@@ -1,0 +1,35 @@
+Ocean Stride — TestFlight device checks
+
+Upload status (October 27, 2026): SUCCEEDED at 16:54 CDT.
+App Store Connect app record: 6827749471.
+Uploaded version 1.0 (1), com.finstergames.OceanStride, with test-level UI/shortcuts removed.
+Apple processing completed. Encryption declaration saved (none of the listed non-OS algorithms). Version 1.0 (1) is assigned to Test game, an internal group with one tester. App Store Connect confirms finnyjthomas@gmail.com is Invited as of October 27, 2026, 4:58 PM CDT. Testing notes saved. Physical-device installation/gameplay results remain unverified.
+Nonblocking warnings: missing GoogleMobileAds and UserMessagingPlatform framework dSYMs.
+Upload log: Release/Artifacts/testflight-upload.log
+Detected physical device: iPhone 16 Pro, connected.
+
+App record setup
+Name: Ocean Stride (subject to availability)
+Platform: iOS
+Primary language: English (U.S.)
+Bundle ID: com.finstergames.OceanStride
+Suggested internal SKU: finstergames-ocean-stride-ios
+Privacy policy: https://finstergames-ocean-stride-privacy.silky-dove-6550.chatgpt.site
+
+After the record exists, use Release/ExportOptions-TestFlight.plist to upload the existing archive. Wait for Apple processing, resolve any export-compliance questions accurately, and add the processed build to an internal testing group. Select the intended tester account before sending an invitation. Install Apple's TestFlight app on the physical device and install Ocean Stride through TestFlight.
+
+Real-device test plan — all checks currently NOT RUN
+Record device model, iOS version, build number, and pass/fail for each check.
+1. Cold launch: opening poster, New Game, Continue, privacy-policy link, and readable buttons inside safe areas.
+2. Controls: rapid taps, double jump, lane swipes, and simultaneous movement/jump; check missed input at platform edges.
+3. Progress: reach a later level, fail/retry on that level; quit and reopen; confirm Continue restores saved progress.
+4. Boost: earn 100 jewels, hold to activate, verify 5-second timer, immunity and speed; release and resume with remaining time; relaunch to verify saved balance.
+5. Difficulty: test level transitions, finish platform, boat decks, late-level helicopters and attack spacing. The advanced-level picker and launch shortcuts have been removed from all builds.
+6. Sound: effects/music, mute toggle, silent switch behavior, interruption by a phone call or other audio, background/resume.
+7. Stability: play continuously for at least 15 minutes; note frame drops, heat, battery drain, crashes, and any unfair falls.
+8. Repeat layout/control checks on a physical iPad and another iPhone screen size when available.
+
+Ads: this Release build has live ads disabled and no production ad-unit ID. Rewarded-ad playback and daily skip limits cannot be exercised through this build's TestFlight UI. Use a deliberately configured Google-test-ad QA build for those checks; do not test by repeatedly watching live production ads.
+
+Testing evidence
+No physical-device gameplay results have been recorded yet. A connected device or successful upload alone is not evidence of a passed gameplay test.

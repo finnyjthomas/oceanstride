@@ -1,0 +1,28 @@
+OCEAN STRIDE — PRIVACY POLICY
+Published at: https://finstergames-ocean-stride-privacy.silky-dove-6550.chatgpt.site
+
+Publisher: FinsterGames
+Privacy contact: thomasfinnyj@gmail.com
+Effective date: October 27, 2026
+
+Game data on your device
+Ocean Stride stores sound preferences, best score, saved level, score, jewels, lives, remaining boost time, and daily rewarded-ad skip usage on your device. There is no player account or developer-operated game server. The game does not upload your saved progress to us. Device backups may contain these files, depending on your Apple settings.
+
+Optional advertising and consent
+When advertising is enabled, Ocean Stride uses Google's AdMob and User Messaging Platform services. Consent information is refreshed when the app opens, which can contact Google even if you do not watch an ad. Required consent forms are shown before an ad is requested. Watching a rewarded ad is optional; completing one can skip a level, at most twice per local calendar day. You can play, retry, and return to the menu without watching ads.
+
+Google's services may process your IP address and approximate location, device or app identifiers, ad views and interactions, and crash and performance information. These services use information to deliver and measure ads, maintain security, and improve their services. Ocean Stride requests non-personalized ads, disables publisher first-party ID, and does not request access to Apple's advertising identifier through tracking permission. Non-personalized advertising still involves data processing.
+
+Google's privacy policy explains its handling and retention of information:
+https://policies.google.com/privacy
+Advertising information:
+https://policies.google.com/technologies/ads
+
+Your choices and retention
+When Google requires a privacy-options entry point, you can use Change ad privacy choices under Privacy & ads. Declining optional ads does not prevent ordinary gameplay. Local game data remains until changed or removed. New Game resets progress but keeps your best score, sound preference, and daily ad usage. Deleting the app removes its local data; offloading the app retains it, and restoring a backup can restore saved data. Manage backups through your Apple settings. For information processed by Google, consult Google's policy and privacy controls; deleting the game does not itself delete Google's records.
+
+Audience
+Ocean Stride is intended for a general audience and is not specifically directed to children. The game does not ask players to provide names, email addresses, or other account details.
+
+Contact and changes
+For privacy questions, contact the publisher using the email above. If you contact us, we receive the information you choose to send and use it to answer your request. Changes to this policy will be published on this page with an updated effective date.

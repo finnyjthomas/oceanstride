@@ -1,0 +1,294 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+        A00000000000000000000009 = {isa = PBXBuildFile; fileRef = B00000000000000000000009; };
+        A0000000000000000000000A = {isa = PBXBuildFile; fileRef = B0000000000000000000000A; };
+        A0000000000000000000000B = {isa = PBXBuildFile; productRef = P00000000000000000000002; };
+        A00000000000000000000008 = {isa = PBXBuildFile; fileRef = B00000000000000000000008; };
+        A00000000000000000000006 /* OpeningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006; };
+        A00000000000000000000007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007; };
+		A00000000000000000000005 /* GameAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000005 /* GameAudio.swift */; };
+		A00000000000000000000001 /* OceanStrideApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000001 /* OceanStrideApp.swift */; };
+		A00000000000000000000002 /* OceanScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000002 /* OceanScene.swift */; };
+		A00000000000000000000003 /* LevelPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000003 /* LevelPlan.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+        B00000000000000000000009 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAds.swift; sourceTree = "<group>"; };
+        B0000000000000000000000A = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+        B00000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressStore.swift; sourceTree = "<group>"; };
+        B00000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpeningView.swift; sourceTree = "<group>"; };
+        B00000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B00000000000000000000005 /* GameAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameAudio.swift; sourceTree = "<group>"; };
+		B00000000000000000000001 /* OceanStrideApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OceanStrideApp.swift; sourceTree = "<group>"; };
+		B00000000000000000000002 /* OceanScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OceanScene.swift; sourceTree = "<group>"; };
+		B00000000000000000000003 /* LevelPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelPlan.swift; sourceTree = "<group>"; };
+		B00000000000000000000004 /* OceanStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OceanStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D00000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+                A0000000000000000000000B,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C00000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				C00000000000000000000002 /* OceanStride */,
+				C00000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C00000000000000000000002 /* OceanStride */ = {
+			isa = PBXGroup;
+			children = (
+				B00000000000000000000001 /* OceanStrideApp.swift */,
+				B00000000000000000000002 /* OceanScene.swift */,
+				B00000000000000000000003 /* LevelPlan.swift */,
+				B00000000000000000000005 /* GameAudio.swift */,
+                B00000000000000000000006,
+                B00000000000000000000008,
+                B00000000000000000000009,
+                B0000000000000000000000A,
+                B00000000000000000000007,
+			);
+			path = OceanStride;
+			sourceTree = "<group>";
+		};
+		C00000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B00000000000000000000004 /* OceanStride.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D00000000000000000000001 /* OceanStride */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F00000000000000000000002 /* Build configuration list for PBXNativeTarget "OceanStride" */;
+			buildPhases = (
+				D00000000000000000000002 /* Sources */,
+				D00000000000000000000003 /* Frameworks */,
+				D00000000000000000000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OceanStride;
+			packageProductDependencies = (P00000000000000000000002,);
+			productName = OceanStride;
+			productReference = B00000000000000000000004 /* OceanStride.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E00000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					D00000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = F00000000000000000000001 /* Build configuration list for PBXProject "OceanStride" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C00000000000000000000001;
+			productRefGroup = C00000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+            packageReferences = (P00000000000000000000001,);
+			targets = (
+				D00000000000000000000001 /* OceanStride */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D00000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+                A00000000000000000000007,
+                A0000000000000000000000A,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D00000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000001 /* OceanStrideApp.swift in Sources */,
+				A00000000000000000000002 /* OceanScene.swift in Sources */,
+				A00000000000000000000003 /* LevelPlan.swift in Sources */,
+				A00000000000000000000005 /* GameAudio.swift in Sources */,
+                A00000000000000000000006,
+                A00000000000000000000008,
+                A00000000000000000000009,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F00000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F00000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F00000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = AZYKC56A66;
+				GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_FILE = OceanStride/AdInfo.plist;
+                OTHER_LDFLAGS = ("$(inherited)", "-ObjC");
+                OCEAN_ADMOB_APP_ID = "ca-app-pub-3940256099942544~1458002511";
+                OCEAN_REWARDED_AD_UNIT_ID = "";
+                OCEAN_LIVE_ADS_ENABLED = NO;
+                OCEAN_PRIVACY_POLICY_URL = "https://finstergames-ocean-stride-privacy.silky-dove-6550.chatgpt.site";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ocean Stride";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finstergames.OceanStride;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F00000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = AZYKC56A66;
+				GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_FILE = OceanStride/AdInfo.plist;
+                OTHER_LDFLAGS = ("$(inherited)", "-ObjC");
+                OCEAN_ADMOB_APP_ID = "ca-app-pub-3940256099942544~1458002511";
+                OCEAN_REWARDED_AD_UNIT_ID = "";
+                OCEAN_LIVE_ADS_ENABLED = NO;
+                OCEAN_PRIVACY_POLICY_URL = "https://finstergames-ocean-stride-privacy.silky-dove-6550.chatgpt.site";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ocean Stride";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.finstergames.OceanStride;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+        P00000000000000000000001 = {
+            isa = XCRemoteSwiftPackageReference;
+            repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+            requirement = {kind = exactVersion; version = 13.11.0; };
+        };
+/* End XCRemoteSwiftPackageReference section */
+/* Begin XCSwiftPackageProductDependency section */
+        P00000000000000000000002 = {isa = XCSwiftPackageProductDependency; package = P00000000000000000000001; productName = GoogleMobileAds; };
+/* End XCSwiftPackageProductDependency section */
+/* Begin XCConfigurationList section */
+		F00000000000000000000001 /* Build configuration list for PBXProject "OceanStride" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F00000000000000000000003 /* Debug */,
+				F00000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F00000000000000000000002 /* Build configuration list for PBXNativeTarget "OceanStride" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F00000000000000000000005 /* Debug */,
+				F00000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E00000000000000000000001 /* Project object */;
+}

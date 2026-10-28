@@ -1,0 +1,49 @@
+Ocean Stride distribution verification — October 27, 2026
+
+Bundle identifier: com.finstergames.OceanStride (Debug and Release)
+Configured team: AZYKC56A66 (Finny Thomas)
+Signing: Automatic
+Version/build: 1.0 (1)
+
+Passed
+- Xcode Release archive for generic/platform=iOS: ARCHIVE SUCCEEDED.
+- Archive contains arm64 device executable (not a simulator build).
+- Archive identifier matches com.finstergames.OceanStride.
+- codesign --verify --deep --strict: valid on disk; designated requirement satisfied.
+- App privacy manifest is included with UserDefaults reason CA92.1.
+
+Archive: Release/Artifacts/OceanStride.xcarchive
+Build log: Release/Artifacts/device-archive.log
+Export log: Release/Artifacts/app-store-export.log
+These generated artifacts are excluded from Git.
+
+App Store export retry — succeeded
++- xcodebuild -exportArchive: EXPORT SUCCEEDED.
++- Exported IPA signed by Apple Distribution: Finny Thomas (AZYKC56A66).
++- Exported app passed codesign --verify --deep --strict.
++- App Store profile: iOS Team Store Provisioning Profile: com.finstergames.OceanStride.
++- application-identifier: AZYKC56A66.com.finstergames.OceanStride.
++- get-task-allow=false; no device restriction and no enterprise all-device provisioning.
++- Profile expires October 27, 2027 at 21:26:24 UTC.
++
++IPA: Release/Artifacts/AppStoreExport/OceanStride.ipa
++Distribution summary: Release/Artifacts/AppStoreExport/DistributionSummary.plist
++Successful export log: Release/Artifacts/app-store-export-retry.log
++The previous failed export log is retained as historical evidence only; its signing blockers are resolved.
++
++No build was uploaded or submitted. Local device-archive, distribution-signing, and export checks passed. Apple's server-side App Store submission validation and physical-device gameplay testing remain separate checks.
++
++Repeat local export:
++env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -exportArchive -archivePath Release/Artifacts/OceanStride.xcarchive -exportPath /tmp/OceanStride-AppStoreExport -exportOptionsPlist Release/ExportOptions-AppStore.plist -allowProvisioningUpdates
++
++Changing from the old com.example.OceanStride identifier creates a separate installation, so old test-install saves do not automatically transfer.
+
+Test-level removal: removed the level picker, seeded jewels/lives, test-session state, and preview/test launch shortcuts from all configurations. Debug simulator build, signed Release device archive, App Store export, and rewarded-skip logic checks passed. Current archive and IPA paths above now contain these changes. Nothing uploaded.
+
+TestFlight upload October 27, 2026, 16:54 CDT: succeeded for app 6827749471, version 1.0 (1). Earlier no-upload notes are superseded. Apple processing and tester assignment pending; no public App Store release submitted. Google SDK dSYM upload warnings were nonblocking.
+
+Build 2 (1.0): landable mint barrier tops and animated fire barriers. Debug build and 100-level landing/mix checks passed; signed arm64 archive succeeded. Uploaded to TestFlight October 27, 2026 at 17:11 CDT. Apple processing/compliance completion remains pending. Same nonblocking Google SDK dSYM warnings. Archive: Release/Artifacts/OceanStride-Build2.xcarchive. Physical gameplay verification not yet performed.
+
+Build 2 processing completed; encryption declaration saved in App Store Connect. Confirmed assigned to Test game internal group (one tester). Build 2 testing notes saved.
+
+Build 3 (1.0): widened safe-top edge-landing tolerance and explicitly excludes supported barriers from side-hit damage. Regression checks and signed device archive passed. Uploaded October 27, 2026 at 17:30 CDT; Apple processing and compliance completion pending. Google SDK dSYM warnings remain nonblocking. Physical verification of this fix is pending. Archive: Release/Artifacts/OceanStride-Build3.xcarchive.
