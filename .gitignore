@@ -4,3 +4,6 @@ build/
 xcuserdata/
 *.xcuserstate
 Release/Artifacts/
+
+# Privacy website has its own separately hosted source repository.
+finstergames-privacy/

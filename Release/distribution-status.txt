@@ -47,3 +47,10 @@ Build 2 (1.0): landable mint barrier tops and animated fire barriers. Debug buil
 Build 2 processing completed; encryption declaration saved in App Store Connect. Confirmed assigned to Test game internal group (one tester). Build 2 testing notes saved.
 
 Build 3 (1.0): widened safe-top edge-landing tolerance and explicitly excludes supported barriers from side-hit damage. Regression checks and signed device archive passed. Uploaded October 27, 2026 at 17:30 CDT; Apple processing and compliance completion pending. Google SDK dSYM warnings remain nonblocking. Physical verification of this fix is pending. Archive: Release/Artifacts/OceanStride-Build3.xcarchive.
+
+Build 4 (1.0): 100 named barrier variants across 10 mechanics families, randomized seeded layouts, 1–2 barriers per occupied lane per interior platform, and a marked safe lane excluded from holes, barriers, and enemy targeting. Safe-top landing fix retained. Save data retains the layout seed.
+Validation: level, progress, rewarded-skip, and hazard-route suites passed; hazard suite checked 6,400 seeded levels and sampled gap trajectories at 120 Hz. Debug simulator build and signed Release arm64 device archive passed. Visual QA used a separate temporary simulator app; no level shortcuts shipped.
+Uploaded October 27, 2026 at 19:15 CDT: EXPORT SUCCEEDED. Apple processing completed; build 4 has no missing-compliance blocker and is assigned to Test game internal group (one tester). Testing notes saved. GoogleMobileAds and UserMessagingPlatform dSYM warnings remain nonblocking. Physical-device gameplay verification remains pending; no public App Store submission performed.
+Archive: Release/Artifacts/OceanStride-Build4.xcarchive
+Upload log: Release/Artifacts/testflight-build4-upload.log
+Original pre-expansion checkpoint: b8c6659 on GitHub main. Expansion branch: codex/themed-hazards.

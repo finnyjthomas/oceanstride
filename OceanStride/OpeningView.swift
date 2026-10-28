@@ -113,9 +113,9 @@ struct OpeningView: View {
         .sheet(isPresented: $showsInstructions) {
             VStack(alignment: .leading, spacing: 22) {
                 Text("Find your stride.").font(.system(size: 28, weight: .black, design: .rounded))
-                instruction("arrow.left.arrow.right", "Swipe to dodge", "Move between three lanes to avoid cannon fire. Land on mint-colored barrier tops and jump again; avoid flaming tops.")
+                instruction("arrow.left.arrow.right", "Swipe to dodge", "Follow the mint route for a clear lane. Jump the gaps; take other lanes for richer jewels. Yellow warns, red means active.")
                 instruction("arrow.up", "Jump. Then jump again.", "Tap JUMP or swipe up. Jump again in the air for a second boost.")
-                instruction("diamond.fill", "Take the daring route", "Golden jewels over obstacles are worth more. Medical packs add lives from level 11.")
+                instruction("diamond.fill", "Take the daring route", "Land on mint stone and hurdle tops. Dodge saws, flames, dragons and moving traps. Medical packs add lives from level 11.")
                 instruction("flag.checkered", "Reach the next shore", "Ride crossing boats or jump from them. Your unlocked level is saved when you leave.")
                 Button("Got it") { showsInstructions = false }
                     .font(.headline).frame(maxWidth: .infinity).padding(15)

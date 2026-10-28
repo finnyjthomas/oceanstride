@@ -59,14 +59,14 @@ final class OceanScene: SKScene {
     func begin(level: Int) {
         session?.resetSkipRequest()
         session?.pauseBoost(save: false)
-        plan = LevelPlan(number: level)
+        plan = LevelPlan(number: level, seed: session?.layoutSeed ?? 0)
         clearTouch(); jumpBuffer = 0; edgeGrace = 0.15; jumpsUsed = 0; jumpStartHeight = 0
-        distance = 2; lane = 1; visualLane = 1; jumping = false; jumpTime = 0
+        distance = 2; lane = plan.safeLane; visualLane = Double(plan.safeLane); jumping = false; jumpTime = 0
         elapsed = 0; volleyCount = 0; footstepTimer = 0; fireTimer = max(5, plan.firingInterval); invulnerable = 0; lastTime = 0
         collectedMedicine.removeAll(); ridingShipID = nil; groundedHeight = 0; boatOffset = 0; noticeTimer = 0
         reached.removeAll(); collected.removeAll(); hitObstacles.removeAll(); shots.removeAll()
         session?.platforms = 0; session?.target = plan.platforms.count
-        session?.progress = 0; session?.message = ""; session?.phase = .playing
+        session?.progress = 0; session?.message = "\(plan.signature.family.title.uppercased()) · \(plan.signature.name.uppercased())"; noticeTimer = 4; session?.phase = .playing
         feedback.prepare()
         render()
     }
@@ -180,11 +180,11 @@ final class OceanScene: SKScene {
             jumping && $0.canLand(previousHeight: previousHeight, height: jumpHeight)
         } ?? false
         let standingOnBarrier = barrierUnderfoot.map {
-            !$0.hasFire && !jumping && groundedHeight >= Barrier.height - 0.01
+            $0.isLandable && !jumping && groundedHeight >= $0.topHeight - 0.01
         } ?? false
         let barrierSupport = landedOnBarrier || standingOnBarrier
         if landedOnBarrier {
-            jumping = false; jumpTime = 0; groundedHeight = Barrier.height
+            jumping = false; jumpTime = 0; groundedHeight = barrierUnderfoot?.topHeight ?? 0
             session.message = "SAFE TOP · JUMP AGAIN"; noticeTimer = 1.2
         }
         let deck = plan.crossingShips.first { $0.supports(distance: distance, x: runnerX, speed: plan.speed) }
@@ -197,7 +197,7 @@ final class OceanScene: SKScene {
         }
         if !jumping {
             if hasGround {
-                groundedHeight = barrierSupport ? Barrier.height : (stoneGround ? 0 : (deck?.deckHeight ?? 0))
+                groundedHeight = barrierSupport ? (barrierUnderfoot?.topHeight ?? 0) : (stoneGround ? 0 : (deck?.deckHeight ?? 0))
                 let newRide = stoneGround ? nil : deck?.id
                 if newRide != nil && ridingShipID != newRide {
                     session.message = "ON DECK · JUMP TO THE NEXT STONE"; noticeTimer = 1.2
@@ -224,10 +224,10 @@ final class OceanScene: SKScene {
             }
             for barrier in stone.barriers where barrier.contains(distance: distance, lane: contactLane)
                 && barrier.causesDamage(height: jumpHeight,
-                    supported: barrierSupport && barrierUnderfoot?.id == barrier.id)
+                    supported: barrierSupport && barrierUnderfoot?.id == barrier.id, time: elapsed)
                 && !hitObstacles.contains(barrier.id) {
                 hitObstacles.insert(barrier.id)
-                damage(barrier.hasFire ? "Avoid the fire tops!" : "Jump onto the barrier from above!")
+                damage(barrier.variant.map { "\($0.name.uppercased()) · WATCH THE WARNING" } ?? "Jump onto the barrier from above!")
                 if session.phase == .lost { return }
             }
             for jewel in stone.jewels where jewel.lane == contactLane && abs(distance - jewel.position) < 0.85 && abs(jumpHeight + 0.8 - jewel.elevation) < 1.05 && !collected.contains(jewel.id) {
@@ -260,8 +260,8 @@ final class OceanScene: SKScene {
             fireTimer = plan.firingInterval
             volleyCount += 1
             let helicopter = plan.hasHelicopters && volleyCount % 3 == 0
-            fire(at: lane, side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
-            if plan.volleySize == 2 { fire(at: (lane + 1) % 3, side: volleyCount % 2 == 0 ? 1 : -1, helicopter: false) }
+            fire(at: plan.attackLanes[volleyCount % 2], side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
+            if plan.volleySize == 2 { fire(at: plan.attackLanes[(volleyCount + 1) % 2], side: volleyCount % 2 == 0 ? 1 : -1, helicopter: false) }
         }
         for i in shots.indices {
             let previousAge = shots[i].age
@@ -328,7 +328,7 @@ final class OceanScene: SKScene {
         guard size.width > 0 else { return }
         world.removeAllChildren()
         let horizon = size.height * 0.71
-        polygon([CGPoint(x: 0, y: horizon), CGPoint(x: size.width, y: horizon), CGPoint(x: size.width, y: size.height), CGPoint(x: 0, y: size.height)], fill: UIColor(red: 0.045, green: 0.14, blue: 0.21, alpha: 1))
+        polygon([CGPoint(x: 0, y: horizon), CGPoint(x: size.width, y: horizon), CGPoint(x: size.width, y: size.height), CGPoint(x: 0, y: size.height)], fill: UIColor(hue: CGFloat(plan.signature.family.rawValue) / 12 + 0.05, saturation: 0.5, brightness: 0.22, alpha: 1))
         ellipse(CGPoint(x: size.width * 0.76, y: size.height * 0.78), width: 65, height: 65, color: UIColor(red: 0.94, green: 0.76, blue: 0.49, alpha: 1))
         drawMountains(horizon: horizon)
         for i in 0..<32 {
@@ -359,6 +359,11 @@ final class OceanScene: SKScene {
                     } else { tile(left, right, near, far, color: color) }
                 }
             }
+            // A continuous mint strip marks the guaranteed route. Enemies never
+            // target it; gaps still require a correctly timed jump.
+            let routeX = Double(plan.safeLane - 1) * 2 / 3
+            tile(routeX - 0.035, routeX + 0.035, stone.start - distance, stone.end - distance,
+                 color: UIColor.systemMint.withAlphaComponent(0.65))
             if index == plan.platforms.count - 1 { drawFinish(stone) }
             // Pale edges make jump takeoffs legible.
             if stone.end - distance > 0 {
@@ -449,19 +454,112 @@ final class OceanScene: SKScene {
 
     private func drawObstacle(_ barrier: Barrier, z: Double) {
         guard z > -3, z < 90 else { return }
+        let v = barrier.variant ?? HazardVariant(id: barrier.hasFire ? 30 : 0)
         let x = Double(barrier.lane - 1) * 2 / 3
         let front = z - Barrier.halfLength, back = z + Barrier.halfLength
-        let top = Barrier.height
-        polygon([project(x - 0.23, front), project(x + 0.23, front), project(x + 0.23, front, elevation: top), project(x - 0.23, front, elevation: top)], fill: UIColor(red: 0.31, green: 0.34, blue: 0.32, alpha: 1), stroke: .init(white: 0.15, alpha: 1), width: 2)
-        polygon([project(x - 0.23, front, elevation: top), project(x + 0.23, front, elevation: top), project(x + 0.23, back, elevation: top), project(x - 0.23, back, elevation: top)], fill: barrier.hasFire ? .darkGray : UIColor(red: 0.38, green: 0.78, blue: 0.65, alpha: 1))
-        line([project(x - 0.18, front, elevation: 0.7), project(x + 0.18, front, elevation: 0.7)], color: barrier.hasFire ? .systemOrange : .systemMint, width: 3)
-        if barrier.hasFire {
-            for flame in 0..<3 {
-                let fx = x + Double(flame - 1) * 0.14
-                let flicker = sin(elapsed * 12 + Double(flame) * 2 + Double(barrier.id)) * 0.12
-                polygon([project(fx - 0.09, z, elevation: top), project(fx + 0.09, z, elevation: top), project(fx + flicker * 0.2, z, elevation: top + 0.75 + flicker)], fill: .systemOrange)
-                polygon([project(fx - 0.045, z - 0.03, elevation: top), project(fx + 0.045, z - 0.03, elevation: top), project(fx, z - 0.03, elevation: top + 0.4)], fill: .systemYellow)
+        let top = barrier.topHeight
+        let active = barrier.active(at: elapsed), warning = barrier.warning(at: elapsed)
+        let hues: [CGFloat] = [0.12, 0.10, 0.0, 0.06, 0.09, 0.02, 0.78, 0.12, 0.65, 0.55]
+        let accent = UIColor(hue: hues[v.family.rawValue] + CGFloat(v.tier) * 0.004, saturation: 0.75, brightness: 0.95, alpha: 1)
+        let signal: UIColor = active ? .systemRed : (warning ? .systemYellow : accent.withAlphaComponent(0.45))
+        let width = v.width
+        func point(_ dx: Double, _ h: Double, _ depth: Double = 0) -> CGPoint { project(x + dx, z + depth, elevation: h) }
+        if barrier.isLandable {
+            if v.family == .hurdle {
+                for side in [-1.0, 1.0] {
+                    line([point(side * 0.22, 0, -1), point(side * 0.22, top, -1)], color: .brown, width: 5)
+                    line([point(side * 0.22, top, -1), point(side * 0.22, top, 1)], color: .brown, width: 4)
+                }
+            } else {
+                polygon([project(x - 0.23, front), project(x + 0.23, front), project(x + 0.23, front, elevation: top), project(x - 0.23, front, elevation: top)], fill: .darkGray, stroke: accent, width: 2)
             }
+            polygon([project(x - 0.23, front, elevation: top), project(x + 0.23, front, elevation: top), project(x + 0.23, back, elevation: top), project(x - 0.23, back, elevation: top)], fill: .systemMint)
+            for mark in 0...v.tier % 4 {
+                let dx = -0.15 + Double(mark) * 0.09
+                line([point(dx, top + 0.01, -0.7), point(dx, top + 0.01, 0.7)], color: .white.withAlphaComponent(0.7), width: 1)
+            }
+            return
+        }
+        // All hazardous mechanisms remain inside their assigned lane.
+        tile(x - 0.25, x + 0.25, front, back, color: signal.withAlphaComponent(0.35))
+        let scale = 1 / (1 + max(-3, z) * 0.045)
+        let cycle = barrier.cycle(at: elapsed)
+        switch v.family {
+        case .blade:
+            let h = active ? 0.6 + Double(v.tier % 3) * 0.35 : 3.5
+            line([point(-0.24, 0), point(-0.24, 4)], color: .gray, width: 3)
+            let center = point(0, h)
+            var teeth: [CGPoint] = []
+            for i in 0..<24 {
+                let angle = Double(i) * .pi / 12 + elapsed * (3 + Double(v.tier) * 0.2)
+                let r = (i % 2 == 0 ? 22.0 : 15.0) * scale
+                teeth.append(CGPoint(x: center.x + cos(angle) * r, y: center.y + sin(angle) * r))
+            }
+            polygon(teeth, fill: .lightGray, stroke: signal, width: 2)
+            ellipse(center, width: 8 * scale, height: 8 * scale, color: accent)
+        case .flame, .dragon:
+            if v.family == .dragon {
+                // Folded wing, armored neck, horns and an open breathing jaw.
+                let flap = sin(elapsed * 3 + Double(v.tier)) * 0.15
+                polygon([point(-0.12, 0.4), point(-0.25, 1.9 + flap), point(-0.06, 1.2), point(0.04, 0.3)], fill: accent.withAlphaComponent(0.65), stroke: .black, width: 1)
+                polygon([point(-0.22, 0), point(-0.22, 1.4), point(-0.1, 1.9), point(0.08, 1.6), point(0.24, 1.1), point(0.1, 0.65)], fill: accent, stroke: .black, width: 1)
+                polygon([point(-0.18, 1.5), point(-0.21, 2.3), point(-0.08, 1.8)], fill: .white)
+                ellipse(point(0, 1.45), width: 6 * scale, height: 6 * scale, color: .systemYellow)
+                line([point(0.08, 0.8), point(0.22, 0.8)], color: .black, width: 4)
+                ellipse(point(0.01, 1.45), width: 2.5 * scale, height: 5 * scale, color: .black)
+                polygon([point(0.12, 0.85), point(0.16, 0.85), point(0.14, 0.6)], fill: .white)
+                for plate in 0..<3 { line([point(-0.18, 0.25 + Double(plate) * 0.25), point(-0.05, 0.3 + Double(plate) * 0.25)], color: .white.withAlphaComponent(0.35), width: 1) }
+            } else {
+                ellipse(point(0, 0.08), width: 40 * scale, height: 13 * scale, color: .darkGray)
+            }
+            if active || warning {
+                for f in 0...2 + v.tier % 3 {
+                    let fx = Double(f - 2) * 0.07
+                    let h = active ? top + 0.75 : 0.3
+                    let flicker = sin(elapsed * 16 + Double(f)) * 0.1
+                    polygon([point(fx - 0.05, 0.1), point(fx + 0.05, 0.1), point(fx + flicker * 0.1, h)], fill: .systemOrange)
+                    polygon([point(fx - 0.025, 0.1), point(fx + 0.025, 0.1), point(fx, h * 0.6)], fill: .systemYellow)
+                }
+            }
+        case .wrecking:
+            let h = active ? 0.9 : 3.2 + sin(cycle * .pi * 2) * 0.2
+            let dx = sin(cycle * .pi * 2) * 0.08
+            line([point(0, 5), point(dx, h)], color: .lightGray, width: 3)
+            ellipse(point(dx, h), width: 38 * scale, height: 38 * scale, color: .darkGray)
+            ellipse(point(dx - 0.035, h + 0.15), width: 10 * scale, height: 10 * scale, color: signal)
+            for i in 0..<v.tier % 4 + 2 {
+                let angle = Double(i) * .pi * 2 / Double(v.tier % 4 + 2)
+                line([point(dx, h), point(dx + cos(angle) * width, h + sin(angle) * 0.6)], color: accent, width: 2)
+            }
+        case .spike, .frost:
+            let h = active ? top + 0.75 : 0.08
+            for i in 0..<3 + v.tier % 3 {
+                let dx = -0.18 + Double(i) * 0.07
+                polygon([point(dx - 0.035, 0), point(dx + 0.035, 0), point(dx, h)], fill: v.family == .frost ? .cyan : .lightGray, stroke: signal, width: 1)
+            }
+            if v.family == .frost {
+                for i in 0..<4 {
+                    let dx = sin(elapsed * 2 + Double(i)) * 0.18
+                    ellipse(point(dx, 1 + Double(i) * 0.5), width: 3 * scale, height: 3 * scale, color: .white)
+                }
+            }
+        case .crusher:
+            let h = active ? 0.15 : 3.5
+            line([point(0, 5), point(0, h + 1.3)], color: .gray, width: 8)
+            polygon([point(-0.23, h), point(0.23, h), point(0.23, h + 1.3), point(-0.23, h + 1.3)], fill: .darkGray, stroke: signal, width: 3)
+            line([point(-0.2, h + 0.2), point(0.2, h + 0.8)], color: .systemYellow, width: 4)
+        case .storm:
+            for side in [-1.0, 1.0] { line([point(side * 0.23, 0), point(side * 0.23, 2.8)], color: accent, width: 4) }
+            if active || warning {
+                let points = (0...8).map { i in point(sin(elapsed * 20 + Double(i)) * 0.17, Double(i) * 0.3) }
+                line(points, color: active ? .cyan : .systemYellow, width: active ? 4 : 1)
+            }
+        default: break
+        }
+        if z > 2 && z < 24 && (warning || active) {
+            let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            label.text = warning ? "!" : "×"; label.fontSize = 16 * scale
+            label.fontColor = signal; label.position = point(0, 4.6); world.addChild(label)
         }
     }
     private func drawBoat(side: Double, z: Double) {

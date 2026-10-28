@@ -72,7 +72,7 @@ final class GameSession: ObservableObject {
         var usage = dailyAdSkips
         guard usage.consume() else { earnedSkipPending = false; return }
         let checkpoint = RunCheckpoint(level: level + 1, score: score, jewels: jewels,
-            hearts: max(3, hearts), boostSeconds: boost.remaining, dailyAdSkips: usage)
+            hearts: max(3, hearts), boostSeconds: boost.remaining, dailyAdSkips: usage, layoutSeed: layoutSeed)
         // Commit the level unlock and daily usage together before granting the skip.
         do { try progressStore.save(checkpoint); hasSavedGame = true; saveFailed = false }
         catch { saveFailed = true; return }
@@ -82,6 +82,7 @@ final class GameSession: ObservableObject {
         phase = .paused
         message = "LEVEL SKIPPED"
     }
+    private(set) var layoutSeed = UInt64.random(in: 1...UInt64.max)
     private var levelStartHearts = 3
     private var levelStartScore = 0
     private var levelStartJewels = 0
@@ -100,6 +101,7 @@ final class GameSession: ObservableObject {
         }
     }
     private func restore(_ checkpoint: RunCheckpoint) {
+        layoutSeed = checkpoint.layoutSeed ?? layoutSeed
         boost = JewelBoost(remaining: checkpoint.boostSeconds ?? 0)
         level = checkpoint.level; score = checkpoint.score; jewels = checkpoint.jewels
         hearts = max(3, checkpoint.hearts)
@@ -113,9 +115,9 @@ final class GameSession: ObservableObject {
     func saveProgress() {
         guard phase != .ready else { return }
         if phase == .cleared {
-            save(RunCheckpoint(level: level, score: score, jewels: jewels, hearts: hearts, boostSeconds: boost.remaining).nextLevel)
+            save(RunCheckpoint(level: level, score: score, jewels: jewels, hearts: hearts, boostSeconds: boost.remaining, layoutSeed: layoutSeed).nextLevel)
         } else {
-            save(RunCheckpoint(level: level, score: levelStartScore, jewels: levelStartJewels, hearts: levelStartHearts, boostSeconds: boost.remaining))
+            save(RunCheckpoint(level: level, score: levelStartScore, jewels: levelStartJewels, hearts: levelStartHearts, boostSeconds: boost.remaining, layoutSeed: layoutSeed))
         }
     }
     func start() {
@@ -125,6 +127,7 @@ final class GameSession: ObservableObject {
         saveProgress()
     }
     func newGame() {
+        layoutSeed = UInt64.random(in: 1...UInt64.max)
         restore(.fresh)
         scene.begin(level: 1)
         saveProgress()
@@ -134,7 +137,7 @@ final class GameSession: ObservableObject {
         saveProgress() // Unlock the next level even if the app closes on the victory screen.
     }
     func next() {
-        restore(RunCheckpoint(level: level, score: score, jewels: jewels, hearts: hearts, boostSeconds: boost.remaining).nextLevel)
+        restore(RunCheckpoint(level: level, score: score, jewels: jewels, hearts: hearts, boostSeconds: boost.remaining, layoutSeed: layoutSeed).nextLevel)
         scene.begin(level: level)
         saveProgress()
     }

@@ -26,11 +26,12 @@ struct RunCheckpoint: Codable, Equatable {
     let hearts: Int
     var boostSeconds: Double? = nil
     var dailyAdSkips: DailyAdSkips? = nil
+    var layoutSeed: UInt64? = nil
     static let fresh = RunCheckpoint(level: 1, score: 0, jewels: 0, hearts: 3)
 
     var nextLevel: RunCheckpoint {
         RunCheckpoint(level: level + 1, score: score, jewels: jewels,
-                      hearts: hearts < 3 ? hearts + 1 : hearts, boostSeconds: boostSeconds, dailyAdSkips: dailyAdSkips)
+                      hearts: hearts < 3 ? hearts + 1 : hearts, boostSeconds: boostSeconds, dailyAdSkips: dailyAdSkips, layoutSeed: layoutSeed)
     }
 }
 

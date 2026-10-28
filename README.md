@@ -6,9 +6,9 @@ A portrait SwiftUI + SpriteKit ocean runner for iPhone and iPad (iOS 17+). Gamep
 
 1. Open `OceanStride.xcodeproj` in Xcode 15 or newer.
 2. Choose the **OceanStride** scheme and an iPhone simulator, then press **Run**.
-3. For a physical iPhone, select your Apple development team in **Signing & Capabilities** and change `com.example.OceanStride` to your own bundle identifier.
+3. For a physical iPhone, use the configured signing team and final identifier `com.finstergames.OceanStride`, or select your own team for a fork.
 
-Full Xcode and its iOS SDK are required. The simulator build passes with Xcode 26.6, and the level rules check passes across 100 levels. The app was installed and launched on the iPhone 17 Pro / iOS 26.4 simulator, and its welcome screen was visually checked (see `Preview/welcome.png`). Automated UI access timed out, so interactive controls and full gameplay still need hands-on testing. The app icon is configured for Debug and Release builds. App Store distribution still needs privacy setup, distribution signing, store metadata, and device testing.
+Full Xcode and its iOS SDK are required. The simulator build passes with Xcode 26.6, and the level rules check passes across 100 levels. The app was installed and launched on the iPhone 17 Pro / iOS 26.4 simulator, and its welcome screen was visually checked (see `Preview/welcome.png`). Automated UI access timed out, so interactive controls and full gameplay still need hands-on testing. The app icon is configured for Debug and Release builds. App Store signing and the hosted privacy policy are configured. Store metadata and physical-device acceptance testing remain.
 
 ## Play
 
@@ -24,8 +24,8 @@ Full Xcode and its iOS SDK are required. The simulator build passes with Xcode 2
 - The final platform is a protected landing area with a checkered finish line and FINISH gate. Reach the line and land to complete the level.
 - Original quiet background music and synthesized cues accompany footsteps, jumps, dodges, jewels, gunfire, hits, death, and completion. Use the speaker button or menu sound toggle to mute; audio respects the iPhone silent switch and pauses with the game.
 - Medical packs first appear at level 11, then once every other level (13, 15, …). None appear in levels 1–10. Pick one up for +1 life, including above three; a green glow and healing chime mark the pickup.
-- Obstacle rows increase at levels 4 and 7, with paired barriers from level 7. At least one safe lane remains on each platform.
-- Compared with that original barrier layout, levels 10–34 have 75% fewer barriers, levels 35–70 have 50% fewer, and levels 71 onward have 75% fewer (remaining counts round up). Barriers are thinned evenly and repeat consistently on retries; jewel rewards are unchanged.
+- Each interior platform has one or two hazards per occupied lane. A mint-marked lane is always clear, including from enemy fire; jump the ocean gaps to follow this reliable route.
+- There are 100 named variants across ten themes: coral stones, harbor hurdles, blades, fire jets, wrecking balls, dragons, spikes, crushers, lightning, and ice. Dimensions, animation cycles, and details vary by level. Yellow warns before active red danger; mint surfaces are landable. See `Release/hazard-catalog.md` for all 100 signatures.
 - From level 6, low ships cross selected gaps with a warning. Time your jump to clear both the water and the deck. The flat wooden decks with mint borders are safe moving platforms: land on them, ride briefly, and jump off. Landing restores both jumps.
 - Each cleared level restores one heart if you have fewer than three; bonus lives are retained. Levels have 5, 7, 9, 11… platforms.
 - Every level starts with a clear platform at least 50% longer than a standard platform, giving at least four seconds of running before the first gap, including on retries.
@@ -101,4 +101,6 @@ The public policy is https://finstergames-ocean-stride-privacy.silky-dove-6550.c
 
 The final bundle identifier is `com.finstergames.OceanStride`. A signed Release arm64 device archive passed local signature verification on October 27, 2026. The App Store export retry succeeded with Apple Distribution signing for team AZYKC56A66; the exported IPA and App Store profile passed local verification. The IPA is `Release/Artifacts/AppStoreExport/OceanStride.ipa`. Nothing has been uploaded, and Apple server-side submission validation remains outstanding. See `Release/distribution-status.txt` for the exact results and retry steps. `Release/ExportOptions-AppStore.plist` configures a local App Store export without uploading. The archive and logs are preserved under ignored `Release/Artifacts/`.
 
-Barrier tops: mint-colored stone barriers can be landed on while descending and restore both jumps. Side impacts remain hazardous. Every third retained barrier has animated fire and cannot support the runner; the first two barriers in each level stay safe. Distribution build 2 includes this change.
+Barrier tops: mint stone and hurdle decks can be landed on while descending and restore both jumps. Other hazard families are never landing surfaces. New Game randomizes the layout; saved seeds make retries and Continue reproduce it.
+
+Run the randomized route suite with `swiftc -O OceanStride/LevelPlan.swift OceanStrideTests/HazardRouteChecks.swift -o /tmp/ocean-hazard-checks && /tmp/ocean-hazard-checks`. It verifies 6,400 complete level layouts and samples gap trajectories at 120 Hz. Physical-device playtesting remains required.

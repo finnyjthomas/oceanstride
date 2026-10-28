@@ -21,9 +21,13 @@ struct ProgressChecks {
         try store.save(withBoost)
         precondition(ProgressStore(fileURL: file).load()?.boostSeconds == 2.5)
         precondition(withBoost.nextLevel.boostSeconds == 2.5)
+        let seeded = RunCheckpoint(level: 42, score: 140, jewels: 0, hearts: 3, layoutSeed: UInt64.max)
+        try store.save(seeded)
+        precondition(ProgressStore(fileURL: file).load()?.layoutSeed == UInt64.max)
+        precondition(seeded.nextLevel.layoutSeed == UInt64.max)
         // Existing saves without the new optional field still load.
         try Data(#"{"level":11,"score":140,"jewels":50,"hearts":3}"#.utf8).write(to: file)
-        precondition(store.load()?.level == 11 && store.load()?.boostSeconds == nil)
+        precondition(store.load()?.level == 11 && store.load()?.boostSeconds == nil && store.load()?.layoutSeed == nil)
         precondition(RunCheckpoint(level: 3, score: 12, jewels: 4, hearts: 1).nextLevel.hearts == 2)
 
         // Invalid or partial data is safe to load, and an atomic save repairs it.

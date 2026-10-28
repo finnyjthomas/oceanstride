@@ -20,12 +20,6 @@ struct LevelPlanChecks {
         precondition(safeBarrier.contains(distance: 10.8, lane: 1))
         precondition(!safeBarrier.contains(distance: 10, lane: 0))
         precondition(!safeBarrier.contains(distance: 11.3, lane: 1))
-        for level in 1...100 {
-            let barriers = LevelPlan(number: level).platforms.flatMap(\.barriers)
-            precondition(barriers.filter { !$0.hasFire }.count >= min(2, barriers.count))
-            if barriers.count >= 3 { precondition(barriers.contains { $0.hasFire }) }
-            precondition(barriers.map(\.hasFire) == LevelPlan(number: level).platforms.flatMap(\.barriers).map(\.hasFire))
-        }
         var boost = JewelBoost()
         var balance = 99
         precondition(!boost.activate(jewels: &balance) && balance == 99 && !boost.isActive)
@@ -66,10 +60,6 @@ struct LevelPlanChecks {
             precondition(plan.platforms.filter { $0.medicalLane != nil }.count == (number >= 11 && number % 2 == 1 ? 1 : 0))
             let allJewels = plan.platforms.flatMap(\.jewels)
             let allBarriers = plan.platforms.flatMap(\.barriers)
-            // Original levels 7+ have five barriers per interior platform.
-            let originalCount = number >= 7 ? (2 * number + 1) * 5 :
-                (number == 1 ? 2 : (2 * number + 1) * (number >= 4 ? 2 : 1))
-            let retainedFraction = number < 10 ? 1.0 : ((35...70).contains(number) ? 0.5 : 0.25)
             let originalSpeed = 10 + 9 * (1 - exp(-Double(number - 1) / 28))
             let paceFraction = number < 10 ? 1.0 : 0.9
             precondition(abs(plan.speed / originalSpeed - paceFraction * 0.9) < 0.000001)
@@ -79,7 +69,8 @@ struct LevelPlanChecks {
             // Even advanced levels must fire repeatedly during their opening thirty seconds.
             let firstAttack = max(5, plan.firingInterval)
             precondition(1 + Int((30 - firstAttack) / plan.firingInterval) >= 3)
-            precondition(allBarriers.count == Int(ceil(Double(originalCount) * retainedFraction)))
+            precondition(allBarriers.count >= (plan.platforms.count - 2) * 2)
+            precondition(allBarriers.count <= (plan.platforms.count - 2) * 4)
             precondition(allBarriers.map(\.id) == LevelPlan(number: number).platforms.flatMap(\.barriers).map(\.id))
             precondition(Set(allJewels.map(\.id)).count == allJewels.count)
             precondition(Set(allBarriers.map(\.id)).count == allBarriers.count)
@@ -125,7 +116,7 @@ struct LevelPlanChecks {
                     precondition(barrier.position > stone.start + 2 && barrier.position < stone.end - 2)
                     precondition(stone.jewels.filter { $0.lane == stone.jewelLane && $0.value == 1 }.count == 2)
                 }
-                precondition(stone.brokenLane == nil || stone.brokenLane != stone.obstacleLane)
+                precondition(stone.brokenLane != plan.safeLane)
                 if i > 0 {
                     let gap = stone.start - plan.platforms[i - 1].end
                     precondition(gap > 0)
@@ -138,9 +129,6 @@ struct LevelPlanChecks {
             }
             if number > 1 {
                 let previous = LevelPlan(number: number - 1)
-                if number != 10 && number != 71 {
-                    precondition(allBarriers.count >= previous.platforms.flatMap(\.barriers).count)
-                }
                 if number != 10 {
                     precondition(plan.speed > previous.speed)
                     precondition(plan.speed - previous.speed < 0.33)
@@ -151,6 +139,6 @@ struct LevelPlanChecks {
                 precondition(plan.projectileSpeed >= previous.projectileSpeed)
             }
         }
-        print("Passed: paid boost cost, duration, repeat prevention and reset; 100 levels of obstacle density, safe routes, rare medicine, reward IDs/placement, crossing-ship jump clearance, and difficulty scaling.")
+        print("Passed: paid boost cost, duration, repeat prevention and reset; 100 levels of bounded hazard density, safe routes, rare medicine, reward IDs/placement, crossing-ship jump clearance, and difficulty scaling.")
     }
 }
