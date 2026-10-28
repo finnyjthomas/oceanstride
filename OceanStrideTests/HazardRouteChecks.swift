@@ -12,7 +12,7 @@ struct HazardRouteChecks {
                 let barriers = plan.platforms.flatMap(\.barriers)
                 precondition(barriers.contains { $0.variantID == level - 1 })
                 precondition(Set(plan.platforms.map(\.safeLane)).count > 1)
-                precondition(plan.platforms[1].barriers.allSatisfy(\.isLandable))
+                precondition(barriers.allSatisfy { $0.variantID == level - 1 })
                 var attackWindows = 0
                 for (index, stone) in plan.platforms.enumerated() {
                     precondition(stone.brokenLane != stone.safeLane)
@@ -84,11 +84,18 @@ struct HazardRouteChecks {
         for id in 20..<100 {
             let b = Barrier(id: id, lane: 0, position: 0, variantID: id)
             precondition(!b.isLandable)
-            precondition(b.active(at: 0))
-            precondition(!b.active(at: b.variant!.period * 0.65))
-            precondition(b.warning(at: b.variant!.period * 0.9))
-            precondition(b.causesDamage(height: 0, supported: false, time: 0))
-            precondition(!b.causesDamage(height: 0, supported: false, time: b.variant!.period * 0.65))
+            let period = b.variant!.period
+            let samples = (0..<100).map { Double($0) / 100 * period }
+            precondition(samples.contains { b.active(at: $0) })
+            precondition(samples.contains { !b.active(at: $0) })
+            precondition(samples.contains { b.warning(at: $0) })
+            for time in samples {
+                if let band = b.damageBand(at: time) {
+                    precondition(b.active(at: time))
+                    precondition(b.causesDamage(height: band.lowerBound, supported: false, time: time))
+                    precondition(!b.causesDamage(height: band.upperBound + 0.1, supported: false, time: time))
+                } else { precondition(!b.causesDamage(height: 0, supported: false, time: time)) }
+            }
         }
         print("Passed: 100 distinct variants, 6,400 seeded levels, complete safe-lane jump routes, attack dodge space, density/spacing, hazard phases and reproducible randomness.")
     }

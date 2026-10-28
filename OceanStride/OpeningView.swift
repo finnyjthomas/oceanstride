@@ -4,6 +4,7 @@ struct OpeningView: View {
     @ObservedObject var game: GameSession
     @ObservedObject var ads: RewardedAds
     @State private var showsInstructions = false
+    @State private var showsFieldGuide = false
     @State private var confirmsNewGame = false
     @State private var showsAdPrivacy = false
     private let ink = Color(red: 0.025, green: 0.18, blue: 0.23)
@@ -77,6 +78,10 @@ struct OpeningView: View {
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                                 .frame(minHeight: 44).padding(.horizontal, 16)
                         }.foregroundStyle(.white.opacity(0.9))
+                        Button { showsFieldGuide = true } label: {
+                            Label("100-level field guide", systemImage: "book.closed.fill")
+                                .font(.system(size: 14, weight: .bold)).frame(minHeight: 44)
+                        }
                         Button("Privacy & ads") { showsAdPrivacy = true }
                             .font(.footnote.bold()).frame(minHeight: 44)
                     HStack {
@@ -109,6 +114,7 @@ struct OpeningView: View {
         } message: {
             Text("This replaces your saved level \(game.level) and starts at level 1. Your best score stays saved.")
         }
+        .sheet(isPresented: $showsFieldGuide) { EncounterFieldGuide() }
         .sheet(isPresented: $showsAdPrivacy) { AdPrivacyView(ads: ads) }
         .sheet(isPresented: $showsInstructions) {
             VStack(alignment: .leading, spacing: 22) {
@@ -140,5 +146,110 @@ private struct OpeningPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+private struct EncounterArtTile: View {
+    let id: Int
+    var projectile = false
+    var time = 0.6
+    var simulatesMechanism = false
+    var body: some View {
+        Canvas { context, size in
+            let marks = projectile ? EncounterArtwork.projectile(AttackProfile(id: id), time: time) : EncounterArtwork.barrier(id, time: time)
+            let sx = min(size.width / 2.5, size.height / 1.65)
+            let sy = sx * 0.9
+            let barrier = Barrier(id: 0, lane: 1, position: 0, variantID: id)
+            let moving = simulatesMechanism && !projectile && !barrier.isLandable
+            let active = barrier.active(at: time)
+            let suspended = [.blade, .wrecking, .crusher].contains(HazardVariant(id: id).family)
+            let heightScale = moving ? (active ? 1.0 : (suspended ? 0.45 : 0.22)) : 1.0
+            let lift = moving && !active && suspended ? 0.5 : 0.0
+            for mark in marks {
+                var path = Path()
+                for (i, p) in mark.points.enumerated() {
+                    let pt = CGPoint(x: size.width / 2 + p.x * sx, y: size.height * 0.78 - (p.y * heightScale + lift) * sy)
+                    if i == 0 { path.move(to: pt) } else { path.addLine(to: pt) }
+                }
+                let rgb = EncounterArtwork.palette[mark.color]
+                let color = Color(red: rgb.0, green: rgb.1, blue: rgb.2)
+                if mark.filled { path.closeSubpath(); context.fill(path, with: .color(color)); context.stroke(path, with: .color(.black.opacity(0.5)), lineWidth: 0.6) }
+                else { context.stroke(path, with: .color(color), lineWidth: max(1, mark.thickness * sx)) }
+            }
+        }.background(Color(red: 0.035, green: 0.16, blue: 0.22), in: RoundedRectangle(cornerRadius: 14))
+            .accessibilityLabel(projectile ? AttackProfile(id: id).name : HazardVariant(id: id).name)
+    }
+}
+
+private struct EncounterFieldGuide: View {
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Each level has its own barrier and weapon/flight pairing. Tap a level to see it move. This guide does not change your progress.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }
+                ForEach(0..<100, id: \.self) { id in
+                    NavigationLink {
+                        EncounterDetail(id: id)
+                    } label: {
+                        HStack(spacing: 12) {
+                            EncounterArtTile(id: id).frame(width: 80, height: 72)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("LEVEL \(id + 1)").font(.caption.bold()).foregroundStyle(.secondary)
+                                Text(HazardVariant(id: id).name).font(.headline)
+                                Text(AttackProfile(id: id).name).font(.caption)
+                            }
+                        }.padding(.vertical, 4)
+                    }
+                }
+            }.navigationTitle("Field guide")
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+    }
+}
+
+private struct EncounterDetail: View {
+    let id: Int
+    @State private var started = Date()
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                let variant = HazardVariant(id: id)
+                Text(variant.name).font(.largeTitle.bold())
+                Text(variant.family.title).foregroundStyle(.secondary)
+                TimelineView(.animation(minimumInterval: 1.0 / 24)) { timeline in
+                    let time = timeline.date.timeIntervalSince(started)
+                    let barrier = Barrier(id: 0, lane: 1, position: 0, variantID: id)
+                    EncounterArtTile(id: id, time: time, simulatesMechanism: true).frame(height: 210)
+                        .overlay(alignment: .topTrailing) {
+                            Text(variant.landable ? "LANDABLE" : (barrier.active(at: time) ? "ACTIVE" : (barrier.warning(at: time) ? "WARNING" : "CLEAR")))
+                                .font(.caption.bold()).padding(10)
+                                .foregroundStyle(variant.landable ? .mint : (barrier.active(at: time) ? .red : .yellow))
+                        }
+                }
+                Text(variant.landable ? "Mint deck: land from above, then jump again." : "\(variant.motionName) mechanism. Yellow warns before activation; red means danger. Use the open lane when it activates.")
+                Text(AttackProfile(id: id).name).font(.title2.bold())
+                TimelineView(.animation(minimumInterval: 1.0 / 24)) { timeline in
+                    let time = timeline.date.timeIntervalSince(started)
+                    let t = time.truncatingRemainder(dividingBy: 3) / 3
+                    let pose = AttackProfile(id: id).flight(at: t)
+                    GeometryReader { geometry in
+                        ZStack(alignment: .topLeading) {
+                            RoundedRectangle(cornerRadius: 16).fill(Color(red: 0.035, green: 0.16, blue: 0.22))
+                            Text("LAUNCH").font(.caption2.bold()).foregroundStyle(.white).position(x: 42, y: 28)
+                            Image(systemName: "scope").foregroundStyle(.red).position(x: geometry.size.width - 45, y: 190)
+                            EncounterArtTile(id: id, projectile: true, time: time).frame(width: 64, height: 64)
+                                .position(x: 45 + (geometry.size.width - 90) * pose.progress + pose.sideways * 0.45,
+                                          y: 60 + 115 * pose.progress - pose.rise * 0.45)
+                        }
+                    }.frame(height: 230)
+                }
+                Text(AttackProfile(id: id).instruction)
+                Text("One barrier-free lane remains on each platform. Attacks can target it, but leave room to dodge. Only levels 71 and above can fire two shots together.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }.padding()
+        }.navigationTitle("Level \(id + 1)").navigationBarTitleDisplayMode(.inline)
     }
 }

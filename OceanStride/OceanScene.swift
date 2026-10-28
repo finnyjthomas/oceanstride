@@ -43,6 +43,7 @@ final class OceanScene: SKScene {
         let lane: Int
         let origin: CGPoint // Normalized screen position of the actual gun muzzle at firing.
         let airborne: Bool
+        let attack: AttackProfile
     }
     private var volleyCount = 0
     private var footstepTimer = 0.0
@@ -256,7 +257,7 @@ final class OceanScene: SKScene {
         // The last platform is a protected landing and finish area.
         let onFinish = stoneIndex == plan.platforms.count - 1
         if onFinish { shots.removeAll() }
-        let targets = plan.attackLanes(at: distance + runningSpeed * max(1.35, 48 / plan.projectileSpeed))
+        let targets = plan.attackLanes(at: distance + runningSpeed * plan.attack.duration(speed: plan.projectileSpeed))
         if fireTimer <= 0 && !onFinish && !targets.isEmpty {
             let helicopter = plan.hasHelicopters && volleyCount % 3 == 0
             let first = fire(at: targets[volleyCount % targets.count], side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
@@ -272,8 +273,8 @@ final class OceanScene: SKScene {
         for i in shots.indices {
             let previousAge = shots[i].age
             shots[i].age += dt
-            if previousAge < shots[i].duration && shots[i].age >= shots[i].duration && shots[i].lane == contactLane && impactTargets.contains(shots[i].lane) && jumpHeight < 1.3 {
-                damage(shots[i].airborne ? "Helicopter hit! Watch the red target." : "Cannon hit! Follow the red warning.")
+            if previousAge < shots[i].duration && shots[i].age >= shots[i].duration && shots[i].lane == contactLane && impactTargets.contains(shots[i].lane) && jumpHeight < shots[i].attack.damageBand.upperBound {
+                damage("\(shots[i].attack.name.uppercased()) · DODGE THE TARGET")
                 if session.phase == .lost { return }
             }
         }
@@ -392,17 +393,19 @@ final class OceanScene: SKScene {
             let destination = project(Double(shot.lane - 1) * 2 / 3, 0, elevation: 0.8)
             let t = min(1, shot.age / shot.duration)
             func flight(_ fraction: Double) -> CGPoint {
-                CGPoint(x: origin.x + (destination.x - origin.x) * fraction,
-                        y: origin.y + (destination.y - origin.y) * fraction + sin(fraction * .pi) * (shot.airborne ? 8 : 22))
+                let pose = shot.attack.flight(at: fraction)
+                return CGPoint(x: origin.x + (destination.x - origin.x) * pose.progress + pose.sideways,
+                               y: origin.y + (destination.y - origin.y) * pose.progress + pose.rise)
             }
             let p = flight(t), scale = 0.45 + t * 0.55
             if shot.age < 0.2 {
                 ellipse(origin, width: 32 * (1 - shot.age / 0.2), height: 32 * (1 - shot.age / 0.2), color: .systemYellow)
             }
-            line([flight(max(0, t - 0.08)), p], color: UIColor.systemOrange.withAlphaComponent(0.7), width: 3 * scale)
-            ellipse(p, width: 24 * scale, height: 24 * scale, color: UIColor.systemOrange.withAlphaComponent(0.25))
-            ellipse(p, width: 14 * scale, height: 14 * scale, color: .init(white: 0.12, alpha: 1))
-            ellipse(CGPoint(x: p.x - 2, y: p.y + 2), width: 5 * scale, height: 5 * scale, color: .systemOrange)
+            line((0...6).map { flight(max(0, t - Double(6 - $0) * 0.018)) }, color: UIColor.systemOrange.withAlphaComponent(0.65), width: 3 * scale)
+            drawMarks(EncounterArtwork.projectile(shot.attack, time: shot.age), transform: { pt in
+                CGPoint(x: p.x + pt.x * 20 * scale, y: p.y + (pt.y - 0.5) * 35 * scale)
+            }, scale: scale)
+
         }
         drawRunner()
     }
@@ -457,114 +460,49 @@ final class OceanScene: SKScene {
         }
     }
 
+    private func drawMarks(_ marks: [EncounterMark], transform: (CGPoint) -> CGPoint, scale: Double = 1) {
+        for mark in marks {
+            let rgb = EncounterArtwork.palette[mark.color]
+            let color = UIColor(red: rgb.0, green: rgb.1, blue: rgb.2, alpha: 1)
+            let points = mark.points.map(transform)
+            if mark.filled { polygon(points, fill: color, stroke: UIColor.black.withAlphaComponent(0.5), width: max(0.5, scale)) }
+            else { line(points, color: color, width: max(1, mark.thickness * 32 * scale)) }
+        }
+    }
+
     private func drawObstacle(_ barrier: Barrier, z: Double) {
         guard z > -3, z < 90 else { return }
         let v = barrier.variant ?? HazardVariant(id: barrier.hasFire ? 30 : 0)
         let x = Double(barrier.lane - 1) * 2 / 3
-        let front = z - Barrier.halfLength, back = z + Barrier.halfLength
-        let top = barrier.topHeight
         let active = barrier.active(at: elapsed), warning = barrier.warning(at: elapsed)
-        let hues: [CGFloat] = [0.12, 0.10, 0.0, 0.06, 0.09, 0.02, 0.78, 0.12, 0.65, 0.55]
-        let accent = UIColor(hue: hues[v.family.rawValue] + CGFloat(v.tier) * 0.004, saturation: 0.75, brightness: 0.95, alpha: 1)
-        let signal: UIColor = active ? .systemRed : (warning ? .systemYellow : accent.withAlphaComponent(0.45))
-        let width = v.width
-        func point(_ dx: Double, _ h: Double, _ depth: Double = 0) -> CGPoint { project(x + dx, z + depth, elevation: h) }
-        if barrier.isLandable {
-            if v.family == .hurdle {
-                for side in [-1.0, 1.0] {
-                    line([point(side * 0.22, 0, -1), point(side * 0.22, top, -1)], color: .brown, width: 5)
-                    line([point(side * 0.22, top, -1), point(side * 0.22, top, 1)], color: .brown, width: 4)
-                }
-            } else {
-                polygon([project(x - 0.23, front), project(x + 0.23, front), project(x + 0.23, front, elevation: top), project(x - 0.23, front, elevation: top)], fill: .darkGray, stroke: accent, width: 2)
-            }
-            polygon([project(x - 0.23, front, elevation: top), project(x + 0.23, front, elevation: top), project(x + 0.23, back, elevation: top), project(x - 0.23, back, elevation: top)], fill: .systemMint)
-            for mark in 0...v.tier % 4 {
-                let dx = -0.15 + Double(mark) * 0.09
-                line([point(dx, top + 0.01, -0.7), point(dx, top + 0.01, 0.7)], color: .white.withAlphaComponent(0.7), width: 1)
-            }
-            return
-        }
-        // All hazardous mechanisms remain inside their assigned lane.
-        tile(x - 0.25, x + 0.25, front, back, color: signal.withAlphaComponent(0.35))
+        let signal: UIColor = active ? .systemRed : (warning ? .systemYellow : .systemMint)
         let scale = 1 / (1 + max(-3, z) * 0.045)
-        let cycle = barrier.cycle(at: elapsed)
-        switch v.family {
-        case .blade:
-            let h = active ? 0.6 + Double(v.tier % 3) * 0.35 : 3.5
-            line([point(-0.24, 0), point(-0.24, 4)], color: .gray, width: 3)
-            let center = point(0, h)
-            var teeth: [CGPoint] = []
-            for i in 0..<24 {
-                let angle = Double(i) * .pi / 12 + elapsed * (3 + Double(v.tier) * 0.2)
-                let r = (i % 2 == 0 ? 22.0 : 15.0) * scale
-                teeth.append(CGPoint(x: center.x + cos(angle) * r, y: center.y + sin(angle) * r))
-            }
-            polygon(teeth, fill: .lightGray, stroke: signal, width: 2)
-            ellipse(center, width: 8 * scale, height: 8 * scale, color: accent)
-        case .flame, .dragon:
-            if v.family == .dragon {
-                // Folded wing, armored neck, horns and an open breathing jaw.
-                let flap = sin(elapsed * 3 + Double(v.tier)) * 0.15
-                polygon([point(-0.12, 0.4), point(-0.25, 1.9 + flap), point(-0.06, 1.2), point(0.04, 0.3)], fill: accent.withAlphaComponent(0.65), stroke: .black, width: 1)
-                polygon([point(-0.22, 0), point(-0.22, 1.4), point(-0.1, 1.9), point(0.08, 1.6), point(0.24, 1.1), point(0.1, 0.65)], fill: accent, stroke: .black, width: 1)
-                polygon([point(-0.18, 1.5), point(-0.21, 2.3), point(-0.08, 1.8)], fill: .white)
-                ellipse(point(0, 1.45), width: 6 * scale, height: 6 * scale, color: .systemYellow)
-                line([point(0.08, 0.8), point(0.22, 0.8)], color: .black, width: 4)
-                ellipse(point(0.01, 1.45), width: 2.5 * scale, height: 5 * scale, color: .black)
-                polygon([point(0.12, 0.85), point(0.16, 0.85), point(0.14, 0.6)], fill: .white)
-                for plate in 0..<3 { line([point(-0.18, 0.25 + Double(plate) * 0.25), point(-0.05, 0.3 + Double(plate) * 0.25)], color: .white.withAlphaComponent(0.35), width: 1) }
-            } else {
-                ellipse(point(0, 0.08), width: 40 * scale, height: 13 * scale, color: .darkGray)
-            }
-            if active || warning {
-                for f in 0...2 + v.tier % 3 {
-                    let fx = Double(f - 2) * 0.07
-                    let h = active ? top + 0.75 : 0.3
-                    let flicker = sin(elapsed * 16 + Double(f)) * 0.1
-                    polygon([point(fx - 0.05, 0.1), point(fx + 0.05, 0.1), point(fx + flicker * 0.1, h)], fill: .systemOrange)
-                    polygon([point(fx - 0.025, 0.1), point(fx + 0.025, 0.1), point(fx, h * 0.6)], fill: .systemYellow)
-                }
-            }
-        case .wrecking:
-            let h = active ? 0.9 : 3.2 + sin(cycle * .pi * 2) * 0.2
-            let dx = sin(cycle * .pi * 2) * 0.08
-            line([point(0, 5), point(dx, h)], color: .lightGray, width: 3)
-            ellipse(point(dx, h), width: 38 * scale, height: 38 * scale, color: .darkGray)
-            ellipse(point(dx - 0.035, h + 0.15), width: 10 * scale, height: 10 * scale, color: signal)
-            for i in 0..<v.tier % 4 + 2 {
-                let angle = Double(i) * .pi * 2 / Double(v.tier % 4 + 2)
-                line([point(dx, h), point(dx + cos(angle) * width, h + sin(angle) * 0.6)], color: accent, width: 2)
-            }
-        case .spike, .frost:
-            let h = active ? top + 0.75 : 0.08
-            for i in 0..<3 + v.tier % 3 {
-                let dx = -0.18 + Double(i) * 0.07
-                polygon([point(dx - 0.035, 0), point(dx + 0.035, 0), point(dx, h)], fill: v.family == .frost ? .cyan : .lightGray, stroke: signal, width: 1)
-            }
-            if v.family == .frost {
-                for i in 0..<4 {
-                    let dx = sin(elapsed * 2 + Double(i)) * 0.18
-                    ellipse(point(dx, 1 + Double(i) * 0.5), width: 3 * scale, height: 3 * scale, color: .white)
-                }
-            }
-        case .crusher:
-            let h = active ? 0.15 : 3.5
-            line([point(0, 5), point(0, h + 1.3)], color: .gray, width: 8)
-            polygon([point(-0.23, h), point(0.23, h), point(0.23, h + 1.3), point(-0.23, h + 1.3)], fill: .darkGray, stroke: signal, width: 3)
-            line([point(-0.2, h + 0.2), point(0.2, h + 0.8)], color: .systemYellow, width: 4)
-        case .storm:
-            for side in [-1.0, 1.0] { line([point(side * 0.23, 0), point(side * 0.23, 2.8)], color: accent, width: 4) }
-            if active || warning {
-                let points = (0...8).map { i in point(sin(elapsed * 20 + Double(i)) * 0.17, Double(i) * 0.3) }
-                line(points, color: active ? .cyan : .systemYellow, width: active ? 4 : 1)
-            }
-        default: break
+        tile(x - 0.25, x + 0.25, z - Barrier.halfLength, z + Barrier.halfLength,
+             color: signal.withAlphaComponent(active ? 0.3 : 0.12))
+        // Artwork and collision share the same live vertical bounds.
+        let band = barrier.damageBand(at: elapsed)
+        let bottom: Double
+        let height: Double
+        if barrier.isLandable { bottom = 0; height = barrier.topHeight }
+        else if let band { bottom = band.lowerBound; height = band.upperBound - band.lowerBound }
+        else if [.blade, .wrecking, .crusher].contains(v.family) { bottom = 3.3; height = 1.4 }
+        else { bottom = 0; height = warning ? 0.75 : 0.4 }
+        if [.blade, .wrecking, .crusher].contains(v.family) {
+            line([project(x, z, elevation: 5), project(x, z, elevation: bottom + height)], color: .gray, width: 2 * scale)
         }
-        if z > 2 && z < 24 && (warning || active) {
+        let art = EncounterArtwork.barrier(v.id, time: elapsed)
+        drawMarks(art, transform: { pt in
+            project(x + Double(pt.x) * 0.25, z - 0.6, elevation: bottom + Double(pt.y) * height)
+        }, scale: scale)
+        if barrier.isLandable {
+            polygon([project(x - 0.25,z - 1.2,elevation:height),project(x + 0.25,z - 1.2,elevation:height),project(x + 0.25,z + 1.2,elevation:height),project(x - 0.25,z + 1.2,elevation:height)], fill: .systemMint.withAlphaComponent(0.8), stroke: .white, width: 1)
+        }
+        if z > 2 && z < 22 {
             let label = SKLabelNode(fontNamed: "AvenirNext-Bold")
-            label.text = warning ? "!" : "×"; label.fontSize = 16 * scale
-            label.fontColor = signal; label.position = point(0, 4.6); world.addChild(label)
+            label.text = warning ? "!" : (active ? "×" : (barrier.isLandable ? "LAND" : "CLEAR"))
+            label.fontSize = 12 * scale; label.fontColor = signal
+            label.position = project(x, z, elevation: max(bottom + height + 0.3, 3))
+            world.addChild(label)
         }
     }
     private func drawBoat(side: Double, z: Double) {
@@ -595,11 +533,12 @@ final class OceanScene: SKScene {
     }
     private func fire(at lane: Int, side: Double, helicopter: Bool) -> Bool {
         let muzzle = helicopter ? helicopterMuzzle : boatMuzzle(side)
-        let duration = max(1.35, 48 / plan.projectileSpeed)
+        let duration = plan.attack.duration(speed: plan.projectileSpeed)
         guard plan.attackLanes(at: distance + runningSpeed * duration).contains(lane) else { return false }
         shots.append(Shot(duration: duration, lane: lane,
-                          origin: CGPoint(x: muzzle.x / size.width, y: muzzle.y / size.height), airborne: helicopter))
+                          origin: CGPoint(x: muzzle.x / size.width, y: muzzle.y / size.height), airborne: helicopter, attack: plan.attack))
         session?.audio.play(helicopter ? .laser : .cannon)
+        if noticeTimer <= 0 { session?.message = plan.attack.name.uppercased(); noticeTimer = 1.4 }
         return true
     }
     private func drawHelicopter() {

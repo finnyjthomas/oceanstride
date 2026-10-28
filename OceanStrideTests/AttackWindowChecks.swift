@@ -6,7 +6,7 @@ struct AttackWindowChecks {
         var markedLaneAttacks = 0
         for level in 1...100 {
             let plan = LevelPlan(number: level, seed: 42)
-            let flight = max(1.35, 48 / plan.projectileSpeed)
+            let flight = plan.attack.duration(speed: plan.projectileSpeed)
             var nextFire = max(5, plan.firingInterval)
             var landed = 0
             var volley = 0

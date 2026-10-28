@@ -1,118 +1,124 @@
-# Ocean Stride — 100-level hazard catalog
+# Ocean Stride — level encounters (build 7)
 
-100 named variants in 10 mechanical families, one signature variant introduced per level. Variants change dimensions, active time, period, and visible details; they are not 100 unrelated physics systems. Levels above 100 repeat the catalog.
+Each of levels 1–100 owns one individually drawn barrier silhouette and one weapon/flight pairing. Every barrier spawned on a level uses that level's design, including the first interior platform. Generic substitute barriers have been removed. Levels above 100 repeat this catalogue.
 
-## Layout and reachability
+The 100 attacks combine ten weapon bodies with ten flight behaviors and structural flight fittings. Weapon height determines jump-versus-dodge behavior; flight curves change the approach and arrival timing. They are 100 distinct combinations, not 100 independent physics engines. Shots originate at the boat or helicopter muzzle and end at the marked lane. Only impact deals damage; the visible flight trail is not a cross-lane collision beam.
 
-- Each occupied lane has one hazard 75% of the time and two 25% of the time. Platforms have been extended for maneuvering room. The marked mint lane has zero hazards and no broken patch. First and finish platforms have no hazards.
-- The marked lane randomly shifts by at most one lane between platforms. Switch lanes while jumping the gap. Cannons and helicopters can target the marked lane. Impacts are scheduled away from platform edges and only when an adjacent lane provides at least 0.45 seconds of obstacle clearance in either direction. Simultaneous shots share an impact time and leave that dodge lane untargeted. Impact space is rechecked if boost changes arrival timing. The marked route requires dodging attacks as well as jumping ocean gaps.
-- Platforms include more than 2.5 seconds of recovery time and gaps use less than 75% of one ordinary jump's travel. The first platform retains at least four seconds before the gap.
-- Hazard rows stay away from platform edges; two rows in the same lane are more than one jump duration apart. Barriers never sit over a broken patch.
-- New Game creates a random seed. Retry, Continue, next level and rewarded skip preserve it. Old saves load without a seed and receive one at the next save.
-- Mint stone/hurdle tops restore jumps. Other mechanisms cannot be landed on. Yellow signals an upcoming active phase; red marks active danger. Mechanisms never reach outside their lane.
-- 6,400 seeded levels (64 seeds × 100 levels) are checked, including sampled 120 Hz normal-jump trajectories across every route gap. These checks establish an obstacle-free route and adjacent dodge space at permitted attack positions; they do not prove that every sequence of player inputs succeeds. Physical-device responsiveness and balancing still need playtesting.
+## Preview and mechanics
 
-## Level signatures
+- Open **100-level field guide** from the title screen, then tap any level. This only previews encounters and never unlocks levels, changes progress, or grants jewels.
+- All 100 barrier drawings are authored separately in `EncounterArtwork.barrier`. The gameplay renderer, guide, and QA contact sheets use those same paths. Geometry tests reject duplicated barrier/projectile artwork.
+- Levels 1–20 have flat mint landing decks on distinct structures; their height varies. Levels 21–100 introduce mechanisms with ten activation sequences and vertical movement profiles. Collision bands and gameplay drawing share their live height bounds. Yellow warns before each active phase.
+- The attack catalogue combines direct, lobbed, skimming, corkscrew, zigzag, returning, stuttering, orbiting, diving, and surging approaches with cannonballs, harpoons, razors, fireballs, anchors, dragon bolts, spines, meteors, lightning, and ice lances. All approaches end at the telegraphed lane, with at least 1.45 seconds of flight warning.
+- One randomly shifting adjacent lane stays barrier-free. Occupied lanes have one barrier 75% of the time and two 25% of the time. Platforms retain the extra maneuvering room. First/finish platforms stay clear.
+- Impacts require nearby dodge space and stay away from ocean gaps. Volleys have one shot through level 70; levels 71+ may have two, with the same arrival time and an untargeted escape lane. Boost timing changes trigger another impact-space check.
+- Retry/Continue preserves the saved layout seed. Existing saves continue normally, with the new encounter designs.
 
-| Level | Theme | Variant | Behavior | Height | Cycle | Active share |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | Coral Ruins | Coral Step | Landable stone top | 0.850 | 3.80s | Always landable |
-| 2 | Coral Ruins | Barnacle Block | Landable stone top | 0.915 | 3.68s | Always landable |
-| 3 | Coral Ruins | Mossy Plinth | Landable stone top | 0.980 | 3.56s | Always landable |
-| 4 | Coral Ruins | Shell Pedestal | Landable stone top | 1.045 | 3.44s | Always landable |
-| 5 | Coral Ruins | Reef Slab | Landable stone top | 1.110 | 3.32s | Always landable |
-| 6 | Coral Ruins | Tide Altar | Landable stone top | 1.175 | 3.20s | Always landable |
-| 7 | Coral Ruins | Pearl Terrace | Landable stone top | 1.240 | 3.08s | Always landable |
-| 8 | Coral Ruins | Sunken Pillar | Landable stone top | 1.305 | 2.96s | Always landable |
-| 9 | Coral Ruins | Carved Monolith | Landable stone top | 1.370 | 2.84s | Always landable |
-| 10 | Coral Ruins | Crownstone | Landable stone top | 1.435 | 2.72s | Always landable |
-| 11 | Harbor Hurdles | Dock Rail | Landable hurdle deck | 0.850 | 3.80s | Always landable |
-| 12 | Harbor Hurdles | Rope Hurdle | Landable hurdle deck | 0.915 | 3.68s | Always landable |
-| 13 | Harbor Hurdles | Driftwood Fence | Landable hurdle deck | 0.980 | 3.56s | Always landable |
-| 14 | Harbor Hurdles | Cargo Beam | Landable hurdle deck | 1.045 | 3.44s | Always landable |
-| 15 | Harbor Hurdles | Copper Rail | Landable hurdle deck | 1.110 | 3.32s | Always landable |
-| 16 | Harbor Hurdles | Buoy Hurdle | Landable hurdle deck | 1.175 | 3.20s | Always landable |
-| 17 | Harbor Hurdles | Anchor Fence | Landable hurdle deck | 1.240 | 3.08s | Always landable |
-| 18 | Harbor Hurdles | Harbor Vault | Landable hurdle deck | 1.305 | 2.96s | Always landable |
-| 19 | Harbor Hurdles | Captain's Rail | Landable hurdle deck | 1.370 | 2.84s | Always landable |
-| 20 | Harbor Hurdles | Admiral's Hurdle | Landable hurdle deck | 1.435 | 2.72s | Always landable |
-| 21 | Blade Foundry | Reef Saw | Spinning blade lifts clear between cuts | 1.000 | 3.80s | 28% |
-| 22 | Blade Foundry | Copper Cutter | Spinning blade lifts clear between cuts | 1.070 | 3.68s | 34% |
-| 23 | Blade Foundry | Twin Tooth | Spinning blade lifts clear between cuts | 1.140 | 3.56s | 40% |
-| 24 | Blade Foundry | Clockwork Blade | Spinning blade lifts clear between cuts | 1.210 | 3.44s | 46% |
-| 25 | Blade Foundry | Crescent Cutter | Spinning blade lifts clear between cuts | 1.280 | 3.32s | 52% |
-| 26 | Blade Foundry | Sharktooth Wheel | Spinning blade lifts clear between cuts | 1.350 | 3.20s | 28% |
-| 27 | Blade Foundry | Crosscut Saw | Spinning blade lifts clear between cuts | 1.420 | 3.08s | 34% |
-| 28 | Blade Foundry | Iron Petal | Spinning blade lifts clear between cuts | 1.490 | 2.96s | 40% |
-| 29 | Blade Foundry | Spiral Razor | Spinning blade lifts clear between cuts | 1.560 | 2.84s | 46% |
-| 30 | Blade Foundry | Foundry Crown | Spinning blade lifts clear between cuts | 1.630 | 2.72s | 52% |
-| 31 | Ember Strait | Ember Vent | Fire jet cycles off / warning / active | 1.000 | 3.80s | 28% |
-| 32 | Ember Strait | Cinder Spout | Fire jet cycles off / warning / active | 1.070 | 3.68s | 34% |
-| 33 | Ember Strait | Torch Jet | Fire jet cycles off / warning / active | 1.140 | 3.56s | 40% |
-| 34 | Ember Strait | Furnace Mouth | Fire jet cycles off / warning / active | 1.210 | 3.44s | 46% |
-| 35 | Ember Strait | Sulfur Geyser | Fire jet cycles off / warning / active | 1.280 | 3.32s | 52% |
-| 36 | Ember Strait | Twin Flame | Fire jet cycles off / warning / active | 1.350 | 3.20s | 28% |
-| 37 | Ember Strait | Lava Bellows | Fire jet cycles off / warning / active | 1.420 | 3.08s | 34% |
-| 38 | Ember Strait | Phoenix Vent | Fire jet cycles off / warning / active | 1.490 | 2.96s | 40% |
-| 39 | Ember Strait | Inferno Spitter | Fire jet cycles off / warning / active | 1.560 | 2.84s | 46% |
-| 40 | Ember Strait | Solar Flare | Fire jet cycles off / warning / active | 1.630 | 2.72s | 52% |
-| 41 | Wreckers Bay | Anchor Swing | Chain weight lowers into lane then lifts | 1.000 | 3.80s | 28% |
-| 42 | Wreckers Bay | Rust Ball | Chain weight lowers into lane then lifts | 1.070 | 3.68s | 34% |
-| 43 | Wreckers Bay | Chain Pendulum | Chain weight lowers into lane then lifts | 1.140 | 3.56s | 40% |
-| 44 | Wreckers Bay | Iron Buoy | Chain weight lowers into lane then lifts | 1.210 | 3.44s | 46% |
-| 45 | Wreckers Bay | Spiked Weight | Chain weight lowers into lane then lifts | 1.280 | 3.32s | 52% |
-| 46 | Wreckers Bay | Shipbreaker | Chain weight lowers into lane then lifts | 1.350 | 3.20s | 28% |
-| 47 | Wreckers Bay | Bronze Hammer | Chain weight lowers into lane then lifts | 1.420 | 3.08s | 34% |
-| 48 | Wreckers Bay | Twin Ring Weight | Chain weight lowers into lane then lifts | 1.490 | 2.96s | 40% |
-| 49 | Wreckers Bay | Titan Pendulum | Chain weight lowers into lane then lifts | 1.560 | 2.84s | 46% |
-| 50 | Wreckers Bay | Leviathan Bell | Chain weight lowers into lane then lifts | 1.630 | 2.72s | 52% |
-| 51 | Dragon Isles | Reef Hatchling | Dragon breath pulses within its own lane | 1.000 | 3.80s | 28% |
-| 52 | Dragon Isles | Cinder Drake | Dragon breath pulses within its own lane | 1.070 | 3.68s | 34% |
-| 53 | Dragon Isles | Copper Wyvern | Dragon breath pulses within its own lane | 1.140 | 3.56s | 40% |
-| 54 | Dragon Isles | Emerald Wyrm | Dragon breath pulses within its own lane | 1.210 | 3.44s | 46% |
-| 55 | Dragon Isles | Horned Serpent | Dragon breath pulses within its own lane | 1.280 | 3.32s | 52% |
-| 56 | Dragon Isles | Ruby Dragon | Dragon breath pulses within its own lane | 1.350 | 3.20s | 28% |
-| 57 | Dragon Isles | Ashwing | Dragon breath pulses within its own lane | 1.420 | 3.08s | 34% |
-| 58 | Dragon Isles | Stormscale | Dragon breath pulses within its own lane | 1.490 | 2.96s | 40% |
-| 59 | Dragon Isles | Obsidian Drake | Dragon breath pulses within its own lane | 1.560 | 2.84s | 46% |
-| 60 | Dragon Isles | Dragon Monarch | Dragon breath pulses within its own lane | 1.630 | 2.72s | 52% |
-| 61 | Thorn Reef | Urchin Bed | Spikes retract between bursts | 1.000 | 3.80s | 28% |
-| 62 | Thorn Reef | Bone Spikes | Spikes retract between bursts | 1.070 | 3.68s | 34% |
-| 63 | Thorn Reef | Reef Thorns | Spikes retract between bursts | 1.140 | 3.56s | 40% |
-| 64 | Thorn Reef | Coral Fangs | Spikes retract between bursts | 1.210 | 3.44s | 46% |
-| 65 | Thorn Reef | Iron Quills | Spikes retract between bursts | 1.280 | 3.32s | 52% |
-| 66 | Thorn Reef | Obsidian Teeth | Spikes retract between bursts | 1.350 | 3.20s | 28% |
-| 67 | Thorn Reef | Emerald Needles | Spikes retract between bursts | 1.420 | 3.08s | 34% |
-| 68 | Thorn Reef | Spear Garden | Spikes retract between bursts | 1.490 | 2.96s | 40% |
-| 69 | Thorn Reef | Kraken Barbs | Spikes retract between bursts | 1.560 | 2.84s | 46% |
-| 70 | Thorn Reef | Thorn Crown | Spikes retract between bursts | 1.630 | 2.72s | 52% |
-| 71 | Crushing Cliffs | Stone Press | Piston raises between crushing strokes | 1.000 | 3.80s | 28% |
-| 72 | Crushing Cliffs | Cargo Drop | Piston raises between crushing strokes | 1.070 | 3.68s | 34% |
-| 73 | Crushing Cliffs | Iron Stomper | Piston raises between crushing strokes | 1.140 | 3.56s | 40% |
-| 74 | Crushing Cliffs | Twin Piston | Piston raises between crushing strokes | 1.210 | 3.44s | 46% |
-| 75 | Crushing Cliffs | Temple Hammer | Piston raises between crushing strokes | 1.280 | 3.32s | 52% |
-| 76 | Crushing Cliffs | Basalt Ram | Piston raises between crushing strokes | 1.350 | 3.20s | 28% |
-| 77 | Crushing Cliffs | Anchor Press | Piston raises between crushing strokes | 1.420 | 3.08s | 34% |
-| 78 | Crushing Cliffs | Titan Stomp | Piston raises between crushing strokes | 1.490 | 2.96s | 40% |
-| 79 | Crushing Cliffs | Fortress Piston | Piston raises between crushing strokes | 1.560 | 2.84s | 46% |
-| 80 | Crushing Cliffs | Mountain Maw | Piston raises between crushing strokes | 1.630 | 2.72s | 52% |
-| 81 | Storm Passage | Static Coil | Electric arc switches off between pulses | 1.000 | 3.80s | 28% |
-| 82 | Storm Passage | Spark Gate | Electric arc switches off between pulses | 1.070 | 3.68s | 34% |
-| 83 | Storm Passage | Thunder Rod | Electric arc switches off between pulses | 1.140 | 3.56s | 40% |
-| 84 | Storm Passage | Plasma Arc | Electric arc switches off between pulses | 1.210 | 3.44s | 46% |
-| 85 | Storm Passage | Storm Fork | Electric arc switches off between pulses | 1.280 | 3.32s | 52% |
-| 86 | Storm Passage | Tesla Ring | Electric arc switches off between pulses | 1.350 | 3.20s | 28% |
-| 87 | Storm Passage | Lightning Cage | Electric arc switches off between pulses | 1.420 | 3.08s | 34% |
-| 88 | Storm Passage | Tempest Coil | Electric arc switches off between pulses | 1.490 | 2.96s | 40% |
-| 89 | Storm Passage | Thunder Crown | Electric arc switches off between pulses | 1.560 | 2.84s | 46% |
-| 90 | Storm Passage | Skybreaker | Electric arc switches off between pulses | 1.630 | 2.72s | 52% |
-| 91 | Frozen Horizon | Ice Shard | Ice shards retract between eruptions | 1.000 | 3.80s | 28% |
-| 92 | Frozen Horizon | Frost Fan | Ice shards retract between eruptions | 1.070 | 3.68s | 34% |
-| 93 | Frozen Horizon | Glacier Fang | Ice shards retract between eruptions | 1.140 | 3.56s | 40% |
-| 94 | Frozen Horizon | Snow Crystal | Ice shards retract between eruptions | 1.210 | 3.44s | 46% |
-| 95 | Frozen Horizon | Polar Spire | Ice shards retract between eruptions | 1.280 | 3.32s | 52% |
-| 96 | Frozen Horizon | Frozen Comet | Ice shards retract between eruptions | 1.350 | 3.20s | 28% |
-| 97 | Frozen Horizon | Diamond Frost | Ice shards retract between eruptions | 1.420 | 3.08s | 34% |
-| 98 | Frozen Horizon | Arctic Prism | Ice shards retract between eruptions | 1.490 | 2.96s | 40% |
-| 99 | Frozen Horizon | Blizzard Crown | Ice shards retract between eruptions | 1.560 | 2.84s | 46% |
-| 100 | Frozen Horizon | Winter Heart | Ice shards retract between eruptions | 1.630 | 2.72s | 52% |
+## Validation
+
+6,400 seeded level layouts, gap trajectories, exclusive level spawning, attack escape windows, 100 distinct barrier geometries, 100 distinct projectile geometries/names, ten nonidentical activation sequences and flight curves, finite/bounded art, and exact projectile endpoints are checked. A separate 100-level schedule simulation verifies attacks still occur and can target the marked lane. Physical-device playtesting remains necessary; modeled route checks do not prove every input sequence will succeed.
+
+## Per-level catalogue
+
+| Level | Theme | Barrier | Barrier behavior | Enemy attack |
+| --- | --- | --- | --- | --- |
+| 1 | Coral Ruins | Coral Step | Landable deck | Direct Cannon |
+| 2 | Coral Ruins | Barnacle Block | Landable deck | Lobbed Cannon |
+| 3 | Coral Ruins | Mossy Plinth | Landable deck | Skimming Cannon |
+| 4 | Coral Ruins | Shell Pedestal | Landable deck | Corkscrew Cannon |
+| 5 | Coral Ruins | Reef Slab | Landable deck | Zigzag Cannon |
+| 6 | Coral Ruins | Tide Altar | Landable deck | Returning Cannon |
+| 7 | Coral Ruins | Pearl Terrace | Landable deck | Stuttering Cannon |
+| 8 | Coral Ruins | Sunken Pillar | Landable deck | Orbiting Cannon |
+| 9 | Coral Ruins | Carved Monolith | Landable deck | Diving Cannon |
+| 10 | Coral Ruins | Crownstone | Landable deck | Surging Cannon |
+| 11 | Harbor Hurdles | Dock Rail | Landable deck | Direct Harpoon |
+| 12 | Harbor Hurdles | Rope Hurdle | Landable deck | Lobbed Harpoon |
+| 13 | Harbor Hurdles | Driftwood Fence | Landable deck | Skimming Harpoon |
+| 14 | Harbor Hurdles | Cargo Beam | Landable deck | Corkscrew Harpoon |
+| 15 | Harbor Hurdles | Copper Rail | Landable deck | Zigzag Harpoon |
+| 16 | Harbor Hurdles | Buoy Hurdle | Landable deck | Returning Harpoon |
+| 17 | Harbor Hurdles | Anchor Fence | Landable deck | Stuttering Harpoon |
+| 18 | Harbor Hurdles | Harbor Vault | Landable deck | Orbiting Harpoon |
+| 19 | Harbor Hurdles | Captain's Rail | Landable deck | Diving Harpoon |
+| 20 | Harbor Hurdles | Admiral's Hurdle | Landable deck | Surging Harpoon |
+| 21 | Blade Foundry | Reef Saw | Sustained | Direct Razor |
+| 22 | Blade Foundry | Copper Cutter | Rising | Lobbed Razor |
+| 23 | Blade Foundry | Twin Tooth | Falling | Skimming Razor |
+| 24 | Blade Foundry | Clockwork Blade | Double beat | Corkscrew Razor |
+| 25 | Blade Foundry | Crescent Cutter | Triple beat | Zigzag Razor |
+| 26 | Blade Foundry | Sharktooth Wheel | Pulsing | Returning Razor |
+| 27 | Blade Foundry | Crosscut Saw | Sweeping | Stuttering Razor |
+| 28 | Blade Foundry | Iron Petal | Spinning | Orbiting Razor |
+| 29 | Blade Foundry | Spiral Razor | Breathing | Diving Razor |
+| 30 | Blade Foundry | Foundry Crown | Delayed strike | Surging Razor |
+| 31 | Ember Strait | Ember Vent | Sustained | Direct Fireball |
+| 32 | Ember Strait | Cinder Spout | Rising | Lobbed Fireball |
+| 33 | Ember Strait | Torch Jet | Falling | Skimming Fireball |
+| 34 | Ember Strait | Furnace Mouth | Double beat | Corkscrew Fireball |
+| 35 | Ember Strait | Sulfur Geyser | Triple beat | Zigzag Fireball |
+| 36 | Ember Strait | Twin Flame | Pulsing | Returning Fireball |
+| 37 | Ember Strait | Lava Bellows | Sweeping | Stuttering Fireball |
+| 38 | Ember Strait | Phoenix Vent | Spinning | Orbiting Fireball |
+| 39 | Ember Strait | Inferno Spitter | Breathing | Diving Fireball |
+| 40 | Ember Strait | Solar Flare | Delayed strike | Surging Fireball |
+| 41 | Wreckers Bay | Anchor Swing | Sustained | Direct Anchor |
+| 42 | Wreckers Bay | Rust Ball | Rising | Lobbed Anchor |
+| 43 | Wreckers Bay | Chain Pendulum | Falling | Skimming Anchor |
+| 44 | Wreckers Bay | Iron Buoy | Double beat | Corkscrew Anchor |
+| 45 | Wreckers Bay | Spiked Weight | Triple beat | Zigzag Anchor |
+| 46 | Wreckers Bay | Shipbreaker | Pulsing | Returning Anchor |
+| 47 | Wreckers Bay | Bronze Hammer | Sweeping | Stuttering Anchor |
+| 48 | Wreckers Bay | Twin Ring Weight | Spinning | Orbiting Anchor |
+| 49 | Wreckers Bay | Titan Pendulum | Breathing | Diving Anchor |
+| 50 | Wreckers Bay | Leviathan Bell | Delayed strike | Surging Anchor |
+| 51 | Dragon Isles | Reef Hatchling | Sustained | Direct Dragon bolt |
+| 52 | Dragon Isles | Cinder Drake | Rising | Lobbed Dragon bolt |
+| 53 | Dragon Isles | Copper Wyvern | Falling | Skimming Dragon bolt |
+| 54 | Dragon Isles | Emerald Wyrm | Double beat | Corkscrew Dragon bolt |
+| 55 | Dragon Isles | Horned Serpent | Triple beat | Zigzag Dragon bolt |
+| 56 | Dragon Isles | Ruby Dragon | Pulsing | Returning Dragon bolt |
+| 57 | Dragon Isles | Ashwing | Sweeping | Stuttering Dragon bolt |
+| 58 | Dragon Isles | Stormscale | Spinning | Orbiting Dragon bolt |
+| 59 | Dragon Isles | Obsidian Drake | Breathing | Diving Dragon bolt |
+| 60 | Dragon Isles | Dragon Monarch | Delayed strike | Surging Dragon bolt |
+| 61 | Thorn Reef | Urchin Bed | Sustained | Direct Spine |
+| 62 | Thorn Reef | Bone Spikes | Rising | Lobbed Spine |
+| 63 | Thorn Reef | Reef Thorns | Falling | Skimming Spine |
+| 64 | Thorn Reef | Coral Fangs | Double beat | Corkscrew Spine |
+| 65 | Thorn Reef | Iron Quills | Triple beat | Zigzag Spine |
+| 66 | Thorn Reef | Obsidian Teeth | Pulsing | Returning Spine |
+| 67 | Thorn Reef | Emerald Needles | Sweeping | Stuttering Spine |
+| 68 | Thorn Reef | Spear Garden | Spinning | Orbiting Spine |
+| 69 | Thorn Reef | Kraken Barbs | Breathing | Diving Spine |
+| 70 | Thorn Reef | Thorn Crown | Delayed strike | Surging Spine |
+| 71 | Crushing Cliffs | Stone Press | Sustained | Direct Meteor |
+| 72 | Crushing Cliffs | Cargo Drop | Rising | Lobbed Meteor |
+| 73 | Crushing Cliffs | Iron Stomper | Falling | Skimming Meteor |
+| 74 | Crushing Cliffs | Twin Piston | Double beat | Corkscrew Meteor |
+| 75 | Crushing Cliffs | Temple Hammer | Triple beat | Zigzag Meteor |
+| 76 | Crushing Cliffs | Basalt Ram | Pulsing | Returning Meteor |
+| 77 | Crushing Cliffs | Anchor Press | Sweeping | Stuttering Meteor |
+| 78 | Crushing Cliffs | Titan Stomp | Spinning | Orbiting Meteor |
+| 79 | Crushing Cliffs | Fortress Piston | Breathing | Diving Meteor |
+| 80 | Crushing Cliffs | Mountain Maw | Delayed strike | Surging Meteor |
+| 81 | Storm Passage | Static Coil | Sustained | Direct Lightning |
+| 82 | Storm Passage | Spark Gate | Rising | Lobbed Lightning |
+| 83 | Storm Passage | Thunder Rod | Falling | Skimming Lightning |
+| 84 | Storm Passage | Plasma Arc | Double beat | Corkscrew Lightning |
+| 85 | Storm Passage | Storm Fork | Triple beat | Zigzag Lightning |
+| 86 | Storm Passage | Tesla Ring | Pulsing | Returning Lightning |
+| 87 | Storm Passage | Lightning Cage | Sweeping | Stuttering Lightning |
+| 88 | Storm Passage | Tempest Coil | Spinning | Orbiting Lightning |
+| 89 | Storm Passage | Thunder Crown | Breathing | Diving Lightning |
+| 90 | Storm Passage | Skybreaker | Delayed strike | Surging Lightning |
+| 91 | Frozen Horizon | Ice Shard | Sustained | Direct Ice lance |
+| 92 | Frozen Horizon | Frost Fan | Rising | Lobbed Ice lance |
+| 93 | Frozen Horizon | Glacier Fang | Falling | Skimming Ice lance |
+| 94 | Frozen Horizon | Snow Crystal | Double beat | Corkscrew Ice lance |
+| 95 | Frozen Horizon | Polar Spire | Triple beat | Zigzag Ice lance |
+| 96 | Frozen Horizon | Frozen Comet | Pulsing | Returning Ice lance |
+| 97 | Frozen Horizon | Diamond Frost | Sweeping | Stuttering Ice lance |
+| 98 | Frozen Horizon | Arctic Prism | Spinning | Orbiting Ice lance |
+| 99 | Frozen Horizon | Blizzard Crown | Breathing | Diving Ice lance |
+| 100 | Frozen Horizon | Winter Heart | Delayed strike | Surging Ice lance |
