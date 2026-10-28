@@ -68,3 +68,4 @@ Validation: 6,400 seeded route/dodge-space checks; level/landing checks; a 100-l
 Archive: Release/Artifacts/OceanStride-Build7.xcarchive
 Preview sheets: Preview/100-barriers.png and Preview/100-attacks.png
 Full level mapping: Release/hazard-catalog.md
+Build 7 upload succeeded October 27, 2026 at 19:53 CDT. Apple processing pending at upload completion. Existing Google SDK dSYM warnings remain nonblocking. Upload log: Release/Artifacts/testflight-build7-upload.log. No public App Store submission.
