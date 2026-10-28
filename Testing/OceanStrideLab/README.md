@@ -34,3 +34,7 @@ A separate TestFlight app requires its own App Store Connect record for this bun
 ## Current validation status
 
 October 28, 2026: simulator build passed and the separate Lab app was installed and launched on the iPhone 17 Pro simulator. Opening-screen labeling was visually checked. LabChecks passed all 3,200 layouts and verified 370 aimed volleys in the 100-level schedule simulation. No physical-device install or TestFlight upload has been performed.
+
+## Choose any test level
+
+On the Lab opening screen, tap **CHOOSE TEST LEVEL · 1–100**. Use the wheel for any level or quick buttons for 1, 25, 50, 75, and 100, then tap **START LEVEL**. Each selection starts a fresh Lab run with three lives, zero jewels, and a new layout seed. Retry remains on that chosen level and Continue restores it. Choosing a level replaces only the Lab save. The original app has no level picker.

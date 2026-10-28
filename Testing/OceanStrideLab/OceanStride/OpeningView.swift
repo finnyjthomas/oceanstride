@@ -5,7 +5,8 @@ struct OpeningView: View {
     @ObservedObject var ads: RewardedAds
     @State private var showsInstructions = false
     @State private var showsFieldGuide = false
-    @State private var confirmsNewGame = false
+    @State private var showsLevelPicker = false
+    @State private var selectedTestLevel = 1
     @State private var showsAdPrivacy = false
     private let ink = Color(red: 0.025, green: 0.18, blue: 0.23)
 
@@ -56,16 +57,16 @@ struct OpeningView: View {
                             .contentShape(RoundedRectangle(cornerRadius: 22))
                         }.buttonStyle(OpeningPressStyle())
                             .accessibilityLabel(game.hasSavedGame ? "Continue from level \(game.level)" : "New game, level 1")
-                        if game.hasSavedGame {
-                            Button { confirmsNewGame = true } label: {
-                                Label("NEW GAME", systemImage: "arrow.counterclockwise")
-                                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                                    .tracking(1).frame(maxWidth: .infinity).frame(height: 52)
-                                    .background(ink.opacity(0.9), in: RoundedRectangle(cornerRadius: 17))
-                                    .overlay(RoundedRectangle(cornerRadius: 17).stroke(.white.opacity(0.75), lineWidth: 1.5))
-                            }.buttonStyle(OpeningPressStyle())
-                                .accessibilityLabel("Start a new game from level 1")
-                        }
+                        Button {
+                            selectedTestLevel = max(1, min(100, game.level))
+                            showsLevelPicker = true
+                        } label: {
+                            Label("CHOOSE TEST LEVEL · 1–100", systemImage: "list.number")
+                                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                                .frame(maxWidth: .infinity).frame(height: 52)
+                                .background(ink.opacity(0.9), in: RoundedRectangle(cornerRadius: 17))
+                                .overlay(RoundedRectangle(cornerRadius: 17).stroke(.mint, lineWidth: 1.5))
+                        }.buttonStyle(OpeningPressStyle())
                         if game.saveFailed {
                             Text("Progress could not be saved. Please check device storage.")
                                 .font(.caption).foregroundStyle(.yellow).multilineTextAlignment(.center)
@@ -108,11 +109,33 @@ struct OpeningView: View {
                 .padding(.bottom, max(geometry.safeAreaInsets.bottom, 20) + 6)
             }.foregroundStyle(.white)
         }
-        .alert("Start a new game?", isPresented: $confirmsNewGame) {
-            Button("Cancel", role: .cancel) { }
-            Button("New Game", role: .destructive) { game.newGame() }
-        } message: {
-            Text("This replaces your saved level \(game.level) and starts at level 1. Your best score stays saved.")
+        .sheet(isPresented: $showsLevelPicker) {
+            NavigationStack {
+                VStack(spacing: 18) {
+                    Text("All 100 levels are unlocked for testing.").font(.headline)
+                    Picker("Test level", selection: $selectedTestLevel) {
+                        ForEach(1...100, id: \.self) { level in
+                            Text("Level \(level) · \(5 + (level - 1) * 2) platforms").tag(level)
+                        }
+                    }.pickerStyle(.wheel).frame(height: 210)
+                    HStack {
+                        ForEach([1,25,50,75,100], id: \.self) { level in
+                            Button("\(level)") { selectedTestLevel = level }
+                                .buttonStyle(.bordered).frame(maxWidth: .infinity)
+                                .accessibilityLabel("Select level \(level)")
+                        }
+                    }
+                    Text("Starts with 3 lives and 0 jewels. Replaces only the Lab's saved run; your main game is unaffected.")
+                        .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    Button("START LEVEL \(selectedTestLevel)") {
+                        showsLevelPicker = false
+                        game.startTestLevel(selectedTestLevel)
+                    }.font(.headline).frame(maxWidth: .infinity).padding(16)
+                        .background(.teal, in: RoundedRectangle(cornerRadius: 16)).foregroundStyle(.white)
+                }.padding(22).navigationTitle("Choose test level")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showsLevelPicker = false } } }
+            }.presentationDetents([.large])
         }
         .sheet(isPresented: $showsFieldGuide) { LabFieldGuide() }
         .sheet(isPresented: $showsAdPrivacy) { AdPrivacyView(ads: ads) }

@@ -132,6 +132,14 @@ final class GameSession: ObservableObject {
         scene.begin(level: 1)
         saveProgress()
     }
+    func startTestLevel(_ selectedLevel: Int) {
+        let selected = max(1, min(100, selectedLevel))
+        layoutSeed = UInt64.random(in: 1...UInt64.max)
+        restore(RunCheckpoint(level: selected, score: 0, jewels: 0, hearts: 3,
+            boostSeconds: 0, dailyAdSkips: dailyAdSkips, layoutSeed: layoutSeed))
+        scene.begin(level: selected)
+        saveProgress()
+    }
     func completeLevel() {
         phase = .cleared
         saveProgress() // Unlock the next level even if the app closes on the victory screen.
