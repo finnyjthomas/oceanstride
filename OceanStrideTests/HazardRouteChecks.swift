@@ -11,13 +11,12 @@ struct HazardRouteChecks {
                 let plan = LevelPlan(number: level, seed: UInt64(seed))
                 let barriers = plan.platforms.flatMap(\.barriers)
                 precondition(barriers.contains { $0.variantID == level - 1 })
-                precondition(!plan.attackLanes.contains(plan.safeLane))
-                precondition(Set(plan.attackLanes).count == 2)
+                precondition(Set(plan.platforms.map(\.safeLane)).count > 1)
                 precondition(plan.platforms[1].barriers.allSatisfy(\.isLandable))
                 for (index, stone) in plan.platforms.enumerated() {
-                    precondition(stone.brokenLane != plan.safeLane)
-                    precondition(stone.barriers.allSatisfy { $0.lane != plan.safeLane })
-                    for lane in plan.attackLanes {
+                    precondition(stone.brokenLane != stone.safeLane)
+                    precondition(stone.barriers.allSatisfy { $0.lane != stone.safeLane })
+                    for lane in (0...2).filter({ $0 != stone.safeLane }) {
                         let laneBarriers = stone.barriers.filter { $0.lane == lane }.sorted { $0.position < $1.position }
                         if index > 0 && index < plan.platforms.count - 1 {
                             precondition((1...2).contains(laneBarriers.count))
@@ -39,6 +38,7 @@ struct HazardRouteChecks {
                     }
                     guard index < plan.platforms.count - 1 else { continue }
                     let next = plan.platforms[index + 1]
+                    precondition(abs(next.safeLane - stone.safeLane) <= 1)
                     let center = (stone.end + next.start) / 2
                     // Construct an actual one-jump trajectory along the marked lane,
                     // sampled at 120 Hz. Water contact must stay clear on both edges.
@@ -47,9 +47,12 @@ struct HazardRouteChecks {
                         let d = center + (t - 0.525) * plan.speed
                         let h = sin(t / 1.05 * .pi) * 2.7
                         if d > stone.end && d < next.start { precondition(h > 0.25) }
+                        // Switch one lane during the jump, at the middle of the gap.
+                        let routeLane = d < center ? stone.safeLane : next.safeLane
+                        precondition(!plan.attackLanes(at: d).contains(routeLane))
                         let over = plan.platforms[index...min(index + 1, plan.platforms.count - 1)]
                         for platform in over {
-                            precondition(!platform.barriers.contains { $0.contains(distance: d, lane: plan.safeLane) })
+                            precondition(!platform.barriers.contains { $0.contains(distance: d, lane: routeLane) })
                         }
                     }
                     precondition(next.length / plan.speed > 2.5) // time to recover before next gap

@@ -54,3 +54,6 @@ Uploaded October 27, 2026 at 19:15 CDT: EXPORT SUCCEEDED. Apple processing compl
 Archive: Release/Artifacts/OceanStride-Build4.xcarchive
 Upload log: Release/Artifacts/testflight-build4-upload.log
 Original pre-expansion checkpoint: b8c6659 on GitHub main. Expansion branch: codex/themed-hazards.
+
+Build 5 (1.0): the marked empty lane now varies randomly by platform, with at most one adjacent-lane change per gap. Every level includes a lane change. Both transition lanes are protected from enemy shots around the gap, including shots already in flight. Hazard density and saved-seed retry behavior remain unchanged. Updated 6,400-layout route checks and level checks passed, as did the simulator build and signed Release device archive. Physical-device verification remains pending.
+Archive: Release/Artifacts/OceanStride-Build5.xcarchive

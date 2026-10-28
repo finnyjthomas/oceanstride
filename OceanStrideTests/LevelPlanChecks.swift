@@ -116,7 +116,7 @@ struct LevelPlanChecks {
                     precondition(barrier.position > stone.start + 2 && barrier.position < stone.end - 2)
                     precondition(stone.jewels.filter { $0.lane == stone.jewelLane && $0.value == 1 }.count == 2)
                 }
-                precondition(stone.brokenLane != plan.safeLane)
+                precondition(stone.brokenLane != stone.safeLane)
                 if i > 0 {
                     let gap = stone.start - plan.platforms[i - 1].end
                     precondition(gap > 0)

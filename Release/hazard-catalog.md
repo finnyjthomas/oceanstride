@@ -5,7 +5,7 @@
 ## Layout and reachability
 
 - Each interior platform has one or two hazards in each of two occupied lanes. The marked mint lane has zero hazards and no broken patch. First and finish platforms have no hazards.
-- The marked lane stays the same for a whole level. Cannons and helicopters target the other two lanes. This gives a constructive no-damage route, with timed jumps across ordinary ocean gaps; it does not require boosts, jewels, extra lives, boat timing or lucky hazard phases.
+- The marked lane randomly shifts by at most one lane between platforms. Switch lanes while jumping the gap. Cannons and helicopters avoid the marked lane and both lanes during the transition; incoming shots in newly protected lanes are cleared. This gives a constructive no-damage route, with timed jumps across ordinary ocean gaps; it does not require boosts, jewels, extra lives, boat timing or lucky hazard phases.
 - Platforms include more than 2.5 seconds of recovery time and gaps use less than 75% of one ordinary jump's travel. The first platform retains at least four seconds before the gap.
 - Hazard rows stay away from platform edges; two rows in the same lane are more than one jump duration apart. Barriers never sit over a broken patch.
 - New Game creates a random seed. Retry, Continue, next level and rewarded skip preserve it. Old saves load without a seed and receive one at the next save.

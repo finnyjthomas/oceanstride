@@ -160,6 +160,7 @@ struct CrossingShip {
 }
 
 struct StonePlatform {
+    let safeLane: Int
     let start: Double
     let length: Double
     let brokenLane: Int?
@@ -178,9 +179,24 @@ struct LevelPlan {
     private let paceScale: Double
     let platforms: [StonePlatform]
     let crossingShips: [CrossingShip]
-    let safeLane: Int
+    var safeLane: Int { platforms[0].safeLane }
     var signature: HazardVariant { HazardVariant(id: (number - 1) % 100) }
-    var attackLanes: [Int] { (0...2).filter { $0 != safeLane } }
+    // Protect both sides of a lane transition, including the ocean jump.
+    func attackLanes(at distance: Double) -> [Int] {
+        var lower = 0
+        var upper = platforms.count
+        while lower < upper {
+            let middle = (lower + upper) / 2
+            if platforms[middle].end + speed * 0.6 < distance { lower = middle + 1 }
+            else { upper = middle }
+        }
+        var protected = Set<Int>()
+        for index in lower..<min(platforms.count, lower + 2) {
+            let stone = platforms[index]
+            if distance >= stone.start - speed * 0.6 { protected.insert(stone.safeLane) }
+        }
+        return (0...2).filter { !protected.contains($0) }
+    }
     var finish: Double { platforms.last!.end - 6 }
     // Reduce frequency by 10% per level, but keep attacks at most ten seconds apart.
     var firingInterval: Double {
@@ -196,13 +212,17 @@ struct LevelPlan {
         paceScale = self.number < 10 ? 1 : 0.9
         speed = (10 + 9 * (1 - exp(-Double(self.number - 1) / 28))) * paceScale * 0.9
         var rng = LayoutRandom(state: seed &+ UInt64(self.number) &* 7919)
-        let safeLane = rng.int(3)
-        self.safeLane = safeLane
-        let occupied = (0...2).filter { $0 != safeLane }
+        var safeLane = rng.int(3)
         let featuredID = (self.number - 1) % 100
         var stones: [StonePlatform] = []
         var cursor = 0.0
         for index in 0..<(5 + (self.number - 1) * 2) {
+            // Only adjacent shifts: never require crossing two lanes over a gap.
+            // Force an early turn so even short levels do not stay straight.
+            if index > 0 && (index == 1 || rng.int(3) != 0) {
+                safeLane = safeLane == 1 ? (rng.int(2) == 0 ? 0 : 2) : 1
+            }
+            let occupied = (0...2).filter { $0 != safeLane }
             // Preserve a full jump-recovery window at both edges and between rows.
             let standardLength = max(30, speed * 2.7)
             let length = index == 0 ? max(standardLength * 1.5, 2 + speed * 4) : standardLength
@@ -239,7 +259,7 @@ struct LevelPlan {
             }
             let medicalIndex = 1 + (self.number * 3) % (3 + (self.number - 1) * 2)
             let medicalLane = self.number >= 11 && self.number % 2 == 1 && index == medicalIndex && !isFinish ? safeLane : nil
-            stones.append(StonePlatform(start: cursor, length: length, brokenLane: brokenLane,
+            stones.append(StonePlatform(safeLane: safeLane, start: cursor, length: length, brokenLane: brokenLane,
                 obstacleLane: barriers.first?.lane, jewelLane: safeLane, barriers: barriers,
                 jewels: jewels, medicalLane: medicalLane))
             cursor += length + gap

@@ -260,9 +260,11 @@ final class OceanScene: SKScene {
             fireTimer = plan.firingInterval
             volleyCount += 1
             let helicopter = plan.hasHelicopters && volleyCount % 3 == 0
-            fire(at: plan.attackLanes[volleyCount % 2], side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
-            if plan.volleySize == 2 { fire(at: plan.attackLanes[(volleyCount + 1) % 2], side: volleyCount % 2 == 0 ? 1 : -1, helicopter: false) }
+            let targets = plan.attackLanes(at: distance)
+            fire(at: targets[volleyCount % targets.count], side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
+            if plan.volleySize == 2 && targets.count == 2 { fire(at: targets[(volleyCount + 1) % targets.count], side: volleyCount % 2 == 0 ? 1 : -1, helicopter: false) }
         }
+        shots.removeAll { !plan.attackLanes(at: distance).contains($0.lane) }
         for i in shots.indices {
             let previousAge = shots[i].age
             shots[i].age += dt
@@ -361,7 +363,7 @@ final class OceanScene: SKScene {
             }
             // A continuous mint strip marks the guaranteed route. Enemies never
             // target it; gaps still require a correctly timed jump.
-            let routeX = Double(plan.safeLane - 1) * 2 / 3
+            let routeX = Double(stone.safeLane - 1) * 2 / 3
             tile(routeX - 0.035, routeX + 0.035, stone.start - distance, stone.end - distance,
                  color: UIColor.systemMint.withAlphaComponent(0.65))
             if index == plan.platforms.count - 1 { drawFinish(stone) }
