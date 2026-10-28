@@ -256,19 +256,23 @@ final class OceanScene: SKScene {
         // The last platform is a protected landing and finish area.
         let onFinish = stoneIndex == plan.platforms.count - 1
         if onFinish { shots.removeAll() }
-        if fireTimer <= 0 && !onFinish {
-            fireTimer = plan.firingInterval
-            volleyCount += 1
+        let targets = plan.attackLanes(at: distance + runningSpeed * max(1.35, 48 / plan.projectileSpeed))
+        if fireTimer <= 0 && !onFinish && !targets.isEmpty {
             let helicopter = plan.hasHelicopters && volleyCount % 3 == 0
-            let targets = plan.attackLanes(at: distance)
-            fire(at: targets[volleyCount % targets.count], side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
-            if plan.volleySize == 2 && targets.count == 2 { fire(at: targets[(volleyCount + 1) % targets.count], side: volleyCount % 2 == 0 ? 1 : -1, helicopter: false) }
+            let first = fire(at: targets[volleyCount % targets.count], side: volleyCount % 2 == 0 ? -1 : 1, helicopter: helicopter)
+            var second = false
+            if plan.volleySize == 2 && targets.count == 2 {
+                second = fire(at: targets[(volleyCount + 1) % targets.count], side: volleyCount % 2 == 0 ? 1 : -1, helicopter: false)
+            }
+            if first || second { volleyCount += 1; fireTimer = plan.firingInterval }
+            else { fireTimer = 0.2 }
         }
-        shots.removeAll { !plan.attackLanes(at: distance).contains($0.lane) }
+        // Recheck impact space if boost changed the predicted arrival position.
+        let impactTargets = plan.attackLanes(at: distance)
         for i in shots.indices {
             let previousAge = shots[i].age
             shots[i].age += dt
-            if previousAge < shots[i].duration && shots[i].age >= shots[i].duration && shots[i].lane == contactLane && jumpHeight < 1.3 {
+            if previousAge < shots[i].duration && shots[i].age >= shots[i].duration && shots[i].lane == contactLane && impactTargets.contains(shots[i].lane) && jumpHeight < 1.3 {
                 damage(shots[i].airborne ? "Helicopter hit! Watch the red target." : "Cannon hit! Follow the red warning.")
                 if session.phase == .lost { return }
             }
@@ -361,8 +365,7 @@ final class OceanScene: SKScene {
                     } else { tile(left, right, near, far, color: color) }
                 }
             }
-            // A continuous mint strip marks the guaranteed route. Enemies never
-            // target it; gaps still require a correctly timed jump.
+            // Mint marks the low-obstacle route; attacks can still target it.
             let routeX = Double(stone.safeLane - 1) * 2 / 3
             tile(routeX - 0.035, routeX + 0.035, stone.start - distance, stone.end - distance,
                  color: UIColor.systemMint.withAlphaComponent(0.65))
@@ -590,12 +593,14 @@ final class OceanScene: SKScene {
         let p = helicopterPosition
         return CGPoint(x: p.x, y: p.y - 17)
     }
-    private func fire(at lane: Int, side: Double, helicopter: Bool) {
+    private func fire(at lane: Int, side: Double, helicopter: Bool) -> Bool {
         let muzzle = helicopter ? helicopterMuzzle : boatMuzzle(side)
-        let duration = max(1.15, (helicopter ? 48 : boatDepth(side)) / plan.projectileSpeed)
+        let duration = max(1.35, 48 / plan.projectileSpeed)
+        guard plan.attackLanes(at: distance + runningSpeed * duration).contains(lane) else { return false }
         shots.append(Shot(duration: duration, lane: lane,
                           origin: CGPoint(x: muzzle.x / size.width, y: muzzle.y / size.height), airborne: helicopter))
         session?.audio.play(helicopter ? .laser : .cannon)
+        return true
     }
     private func drawHelicopter() {
         let p = helicopterPosition

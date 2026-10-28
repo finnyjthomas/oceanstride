@@ -13,6 +13,7 @@ struct HazardRouteChecks {
                 precondition(barriers.contains { $0.variantID == level - 1 })
                 precondition(Set(plan.platforms.map(\.safeLane)).count > 1)
                 precondition(plan.platforms[1].barriers.allSatisfy(\.isLandable))
+                var attackWindows = 0
                 for (index, stone) in plan.platforms.enumerated() {
                     precondition(stone.brokenLane != stone.safeLane)
                     precondition(stone.barriers.allSatisfy { $0.lane != stone.safeLane })
@@ -36,6 +37,19 @@ struct HazardRouteChecks {
                             precondition((laneBarriers[1].position - laneBarriers[0].position) / plan.speed > 1.05)
                         }
                     }
+                    for sample in 0...34 {
+                        let d = stone.start + stone.length * Double(sample) / 34
+                        let targets = plan.attackLanes(at: d)
+                        if !targets.isEmpty {
+                            attackWindows += 1
+                            precondition(targets.contains(stone.safeLane))
+                            let escape = (0...2).first { !targets.contains($0) }!
+                            precondition(abs(escape - stone.safeLane) == 1)
+                            precondition(d > stone.start + plan.speed * 0.8 && d < stone.end - plan.speed * 0.8)
+                            precondition(!stone.barriers.contains { $0.lane == escape && abs($0.position - d) < Barrier.halfLength + plan.speed * 0.45 })
+                            precondition(!(stone.brokenLane == escape && abs(stone.start + stone.length / 2 - d) < 2.4 + plan.speed * 0.45))
+                        }
+                    }
                     guard index < plan.platforms.count - 1 else { continue }
                     let next = plan.platforms[index + 1]
                     precondition(abs(next.safeLane - stone.safeLane) <= 1)
@@ -49,7 +63,7 @@ struct HazardRouteChecks {
                         if d > stone.end && d < next.start { precondition(h > 0.25) }
                         // Switch one lane during the jump, at the middle of the gap.
                         let routeLane = d < center ? stone.safeLane : next.safeLane
-                        precondition(!plan.attackLanes(at: d).contains(routeLane))
+
                         let over = plan.platforms[index...min(index + 1, plan.platforms.count - 1)]
                         for platform in over {
                             precondition(!platform.barriers.contains { $0.contains(distance: d, lane: routeLane) })
@@ -57,6 +71,7 @@ struct HazardRouteChecks {
                     }
                     precondition(next.length / plan.speed > 2.5) // time to recover before next gap
                 }
+                precondition(attackWindows > 0)
                 if level == 50 {
                     fingerprints.insert(barriers.map { "\($0.lane):\($0.position):\($0.variantID!)" }.joined(separator: ","))
                 }
@@ -75,6 +90,6 @@ struct HazardRouteChecks {
             precondition(b.causesDamage(height: 0, supported: false, time: 0))
             precondition(!b.causesDamage(height: 0, supported: false, time: b.variant!.period * 0.65))
         }
-        print("Passed: 100 distinct variants, 6,400 seeded levels, complete safe-lane jump routes, enemy exclusions, density/spacing, hazard phases and reproducible randomness.")
+        print("Passed: 100 distinct variants, 6,400 seeded levels, complete safe-lane jump routes, attack dodge space, density/spacing, hazard phases and reproducible randomness.")
     }
 }

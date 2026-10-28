@@ -4,13 +4,13 @@
 
 ## Layout and reachability
 
-- Each interior platform has one or two hazards in each of two occupied lanes. The marked mint lane has zero hazards and no broken patch. First and finish platforms have no hazards.
-- The marked lane randomly shifts by at most one lane between platforms. Switch lanes while jumping the gap. Cannons and helicopters avoid the marked lane and both lanes during the transition; incoming shots in newly protected lanes are cleared. This gives a constructive no-damage route, with timed jumps across ordinary ocean gaps; it does not require boosts, jewels, extra lives, boat timing or lucky hazard phases.
+- Each occupied lane has one hazard 75% of the time and two 25% of the time. Platforms have been extended for maneuvering room. The marked mint lane has zero hazards and no broken patch. First and finish platforms have no hazards.
+- The marked lane randomly shifts by at most one lane between platforms. Switch lanes while jumping the gap. Cannons and helicopters can target the marked lane. Impacts are scheduled away from platform edges and only when an adjacent lane provides at least 0.45 seconds of obstacle clearance in either direction. Simultaneous shots share an impact time and leave that dodge lane untargeted. Impact space is rechecked if boost changes arrival timing. The marked route requires dodging attacks as well as jumping ocean gaps.
 - Platforms include more than 2.5 seconds of recovery time and gaps use less than 75% of one ordinary jump's travel. The first platform retains at least four seconds before the gap.
 - Hazard rows stay away from platform edges; two rows in the same lane are more than one jump duration apart. Barriers never sit over a broken patch.
 - New Game creates a random seed. Retry, Continue, next level and rewarded skip preserve it. Old saves load without a seed and receive one at the next save.
 - Mint stone/hurdle tops restore jumps. Other mechanisms cannot be landed on. Yellow signals an upcoming active phase; red marks active danger. Mechanisms never reach outside their lane.
-- 6,400 seeded levels (64 seeds × 100 levels) are checked, including sampled 120 Hz normal-jump trajectories across every route gap. This proves a route exists under the modeled controls, not that every player input succeeds. Physical-device responsiveness and balancing still need playtesting.
+- 6,400 seeded levels (64 seeds × 100 levels) are checked, including sampled 120 Hz normal-jump trajectories across every route gap. These checks establish an obstacle-free route and adjacent dodge space at permitted attack positions; they do not prove that every sequence of player inputs succeeds. Physical-device responsiveness and balancing still need playtesting.
 
 ## Level signatures
 

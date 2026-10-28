@@ -181,21 +181,28 @@ struct LevelPlan {
     let crossingShips: [CrossingShip]
     var safeLane: Int { platforms[0].safeLane }
     var signature: HazardVariant { HazardVariant(id: (number - 1) % 100) }
-    // Protect both sides of a lane transition, including the ocean jump.
+    // The mint lane is a low-obstacle route, not immunity from attacks.
+    // Leave a nearby dodge lane clear throughout a short maneuvering window.
     func attackLanes(at distance: Double) -> [Int] {
         var lower = 0
         var upper = platforms.count
         while lower < upper {
             let middle = (lower + upper) / 2
-            if platforms[middle].end + speed * 0.6 < distance { lower = middle + 1 }
+            if platforms[middle].end < distance { lower = middle + 1 }
             else { upper = middle }
         }
-        var protected = Set<Int>()
-        for index in lower..<min(platforms.count, lower + 2) {
-            let stone = platforms[index]
-            if distance >= stone.start - speed * 0.6 { protected.insert(stone.safeLane) }
+        guard lower > 0, lower < platforms.count - 1 else { return [] }
+        let stone = platforms[lower]
+        let room = speed * 0.45
+        guard distance > stone.start + speed * 0.8,
+              distance < stone.end - speed * 0.8 else { return [] }
+        let escape = (0...2).first { lane in
+            lane != stone.safeLane && abs(lane - stone.safeLane) == 1 &&
+            !stone.barriers.contains { $0.lane == lane && abs($0.position - distance) < Barrier.halfLength + room } &&
+            !(stone.brokenLane == lane && abs(stone.start + stone.length / 2 - distance) < 2.4 + room)
         }
-        return (0...2).filter { !protected.contains($0) }
+        guard let escape else { return [] }
+        return (0...2).filter { $0 != escape }
     }
     var finish: Double { platforms.last!.end - 6 }
     // Reduce frequency by 10% per level, but keep attacks at most ten seconds apart.
@@ -224,7 +231,7 @@ struct LevelPlan {
             }
             let occupied = (0...2).filter { $0 != safeLane }
             // Preserve a full jump-recovery window at both edges and between rows.
-            let standardLength = max(30, speed * 2.7)
+            let standardLength = max(36, speed * 3.4)
             let length = index == 0 ? max(standardLength * 1.5, 2 + speed * 4) : standardLength
             let gap = min(6.5, 3.4 + Double(self.number - 1) * 0.3, speed * 1.05 * 0.75)
             let isFinish = index == 4 + (self.number - 1) * 2
@@ -237,7 +244,7 @@ struct LevelPlan {
             }
             if interior {
                 for (slot, obstacleLane) in occupied.enumerated() {
-                    let count = rng.int(2) + 1
+                    let count = rng.int(4) == 0 ? 2 : 1
                     for row in 0..<count {
                         // Do not put a landing surface on a broken patch.
                         let fraction = count == 1 ? (brokenLane == obstacleLane ? 0.27 : 0.5) : (row == 0 ? 0.27 : 0.73)
